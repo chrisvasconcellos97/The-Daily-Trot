@@ -73,9 +73,8 @@ export default function HomeView({ familyId, session, toast }) {
   const { events } = useSchedule(familyId)
   const { children } = useChildren(familyId)
 
-  const firstName = session?.user?.email
-    ? session.user.email.split('@')[0].charAt(0).toUpperCase() + session.user.email.split('@')[0].slice(1)
-    : 'there'
+  const rawName = session?.user?.email?.split('@')[0] || 'there'
+  const firstName = rawName.split(/[._]/)[0].charAt(0).toUpperCase() + rawName.split(/[._]/)[0].slice(1)
 
   const todayStr = format(new Date(), 'yyyy-MM-dd')
   const todayDisplay = format(new Date(), 'EEEE, MMMM d')
@@ -93,8 +92,9 @@ export default function HomeView({ familyId, session, toast }) {
   return (
     <div className="view-enter">
       <ScallopHeader
-        title={`${getGreeting()}, ${firstName}`}
+        title={`${getGreeting()}, ${firstName}.`}
         subtitle={todayDisplay}
+        greeting
       />
 
       <div style={{ padding: '32px 20px 20px' }}>

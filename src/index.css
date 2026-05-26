@@ -49,9 +49,10 @@ body {
 
 .scallop-header {
   background: #1E3D2F;
-  padding: 52px 20px 32px;
+  padding: 20px 20px 32px;
   position: relative;
   flex-shrink: 0;
+  overflow: visible;
 }
 
 .scallop-header__title {

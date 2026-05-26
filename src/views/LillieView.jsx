@@ -62,7 +62,7 @@ export default function LillieView({ familyId, session, onClose }) {
       margin: '0 auto',
     }}>
       {/* Header */}
-      <div style={{ background: C.primary, padding: '52px 20px 32px', position: 'relative', flexShrink: 0 }}>
+      <div style={{ background: C.primary, padding: '20px 20px 32px', position: 'relative', flexShrink: 0 }}>
         <button
           onClick={onClose}
           style={{
