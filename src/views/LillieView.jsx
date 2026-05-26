@@ -7,9 +7,8 @@ export default function LillieView({ familyId, session, onClose }) {
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef(null)
 
-  const firstName = session?.user?.email
-    ? session.user.email.split('@')[0].charAt(0).toUpperCase() + session.user.email.split('@')[0].slice(1)
-    : 'there'
+  const rawName = session?.user?.email?.split('@')[0] || 'there'
+  const firstName = rawName.split(/[._]/)[0].charAt(0).toUpperCase() + rawName.split(/[._]/)[0].slice(1)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

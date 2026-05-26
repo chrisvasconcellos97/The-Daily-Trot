@@ -2,15 +2,25 @@ import { useState } from 'react'
 import C from '../colors'
 
 const DachshundSVG = () => (
-  <svg width="80" height="50" viewBox="0 0 32 20" fill={C.accent} aria-hidden="true">
-    <ellipse cx="14" cy="12" rx="10" ry="6" />
-    <circle cx="26" cy="10" r="5" />
-    <ellipse cx="24" cy="8" rx="3" ry="2" />
-    <rect x="6" y="16" width="3" height="5" rx="1.5" />
-    <rect x="11" y="17" width="3" height="4" rx="1.5" />
-    <rect x="17" y="16" width="3" height="5" rx="1.5" />
-    <rect x="22" y="17" width="3" height="4" rx="1.5" />
-    <ellipse cx="2" cy="13" rx="3" ry="2" />
+  <svg width="90" height="55" viewBox="0 0 82 50" fill={C.accent} aria-hidden="true">
+    {/* Tail curves up from rump */}
+    <path d="M14,25 C10,18 8,11 11,8 C14,6 16,10 15,19 Z" />
+    {/* Body */}
+    <ellipse cx="34" cy="27" rx="21" ry="10" />
+    {/* Neck */}
+    <ellipse cx="54" cy="22" rx="8" ry="7" />
+    {/* Head */}
+    <circle cx="65" cy="18" r="9" />
+    {/* Snout */}
+    <ellipse cx="76" cy="23" rx="8" ry="5" />
+    {/* Floppy ear */}
+    <ellipse cx="62" cy="28" rx="5" ry="9" />
+    {/* Front legs */}
+    <rect x="48" y="27" width="5" height="18" rx="2.5" />
+    <rect x="56" y="27" width="5" height="18" rx="2.5" />
+    {/* Back legs */}
+    <rect x="21" y="28" width="5" height="17" rx="2.5" />
+    <rect x="29" y="28" width="5" height="17" rx="2.5" />
   </svg>
 )
 
