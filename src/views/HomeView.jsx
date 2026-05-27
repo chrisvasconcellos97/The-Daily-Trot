@@ -83,6 +83,18 @@ function TileIcon({ kind }) {
         <path d="M21 22l3 3 4-5" stroke={C.gold}/>
       </svg>
     )
+    case 'cart': return (
+      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
+        <path d="M4 6h3l3 14h14l3-10H9"/>
+        <circle cx="12" cy="24" r="1.8" fill={C.primary}/>
+        <circle cx="22" cy="24" r="1.8" fill={C.primary}/>
+      </svg>
+    )
+    case 'star': return (
+      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
+        <path d="M16 4l3 8h9l-7 5 3 8-8-5-8 5 3-8-7-5h9z"/>
+      </svg>
+    )
     default: return null
   }
 }
@@ -90,7 +102,7 @@ function TileIcon({ kind }) {
 const tiles = [
   { label: 'SCHEDULE',      icon: 'cal',   route: '/schedule' },
   { label: 'GROCERY',       icon: 'cart',  route: '/grocery' },
-  { label: 'EVENTS',        icon: 'abc',   route: '/events' },
+  { label: 'EVENTS',        icon: 'star',  route: '/events' },
   { label: 'TASKS',         icon: 'clip',  route: null },
   { label: 'PACKING LISTS', icon: 'bag',   route: '/packing' },
   { label: 'PLACES',        icon: 'pin',   route: '/places' },
