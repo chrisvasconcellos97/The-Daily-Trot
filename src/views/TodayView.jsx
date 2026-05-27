@@ -1,27 +1,54 @@
 import { useState } from 'react'
 import { format, addDays, subDays } from 'date-fns'
-import ScallopHeader from '../components/ScallopHeader'
+import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
 import Modal from '../components/Modal'
 import { useSchedule } from '../hooks/useSchedule'
 import { usePlaces } from '../hooks/usePlaces'
 import C from '../colors'
 
-const iconTypeMap = {
-  'morning-routine': '☀️',
-  'school': '🏫',
-  'library': '📚',
-  'swim': '🏊',
-  'errand': '🛒',
-  'meal': '🍽️',
-  'bedtime': '🌙',
-  'activity': '⭐',
-  'default': '📅',
+function EventIcon({ kind }) {
+  const s = { fill: 'none', stroke: C.primary, strokeWidth: 1.3, strokeLinecap: 'round', strokeLinejoin: 'round' }
+  switch (kind) {
+    case 'sun': return <svg viewBox="0 0 24 24" width="16" height="16" {...s}><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></svg>
+    case 'car': return <svg viewBox="0 0 24 24" width="16" height="16" {...s}><path d="M4 14l1.5-5h13L20 14M4 14v4h2v-2h12v2h2v-4M4 14h16"/><circle cx="7" cy="15.5" r="1" fill={C.primary}/><circle cx="17" cy="15.5" r="1" fill={C.primary}/></svg>
+    case 'book': return <svg viewBox="0 0 24 24" width="16" height="16" {...s}><path d="M4 5c2-.5 5-.5 8 1 3-1.5 6-1.5 8-1v14c-2-.5-5-.5-8 1-3-1.5-6-1.5-8-1V5z"/><path d="M12 6v14"/></svg>
+    case 'cup': return <svg viewBox="0 0 24 24" width="16" height="16" {...s}><path d="M6 8h11v6a4 4 0 01-4 4H10a4 4 0 01-4-4V8z"/><path d="M17 10h2a2 2 0 110 4h-2"/><path d="M9 4v2M12 3v3M15 4v2"/></svg>
+    case 'wave': return <svg viewBox="0 0 24 24" width="16" height="16" {...s}><path d="M3 13c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2"/><path d="M3 17c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2"/><path d="M3 9c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2"/></svg>
+    case 'cart': return <svg viewBox="0 0 24 24" width="16" height="16" {...s}><path d="M3 4h2l2 12h11l2-8H6"/><circle cx="9" cy="20" r="1.3" fill={C.primary}/><circle cx="17" cy="20" r="1.3" fill={C.primary}/></svg>
+    case 'fork': return <svg viewBox="0 0 24 24" width="16" height="16" {...s}><path d="M8 3v6a2 2 0 002 2v9M8 3v3M11 3v3"/><path d="M15 3c-1 2-1 6 0 8h1v9"/></svg>
+    case 'moon': return <svg viewBox="0 0 24 24" width="16" height="16" {...s}><path d="M20 14a8 8 0 11-10-10 6 6 0 0010 10z"/></svg>
+    default: return <svg viewBox="0 0 24 24" width="16" height="16" {...s}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+  }
 }
+
+const iconTypeMap = {
+  'morning-routine': 'sun',
+  'school': 'car',
+  'library': 'book',
+  'swim': 'wave',
+  'errand': 'cart',
+  'meal': 'fork',
+  'bedtime': 'moon',
+  'activity': 'sun',
+  'default': 'sun',
+}
+
+// Sample events from design spec (shown when DB is empty)
+const SAMPLE_EVENTS = [
+  { id: 's1', time: '7:00 AM', title: 'Morning Routine', sub: 'Breakfast, vitamins + more', icon: 'sun' },
+  { id: 's2', time: '8:15 AM', title: 'School Drop Off', sub: '', icon: 'car' },
+  { id: 's3', time: '10:00 AM', title: 'Library Storytime', sub: 'Main Street Library', icon: 'book' },
+  { id: 's4', time: '12:00 PM', title: 'Lunch with Harper', sub: 'The Meadow Café', icon: 'cup' },
+  { id: 's5', time: '2:30 PM', title: 'Swim Class', sub: 'AquaKids', icon: 'wave' },
+  { id: 's6', time: '4:00 PM', title: 'Grocery Pickup', sub: 'Wegmans', icon: 'cart' },
+  { id: 's7', time: '6:30 PM', title: 'Family Dinner', sub: 'Chicken tacos', icon: 'fork' },
+  { id: 's8', time: '8:30 PM', title: 'Bedtime Routine', sub: 'Stories & snuggles', icon: 'moon' },
+]
 
 function formatTime12(timeStr) {
   if (!timeStr) return ''
   const [h, m] = timeStr.split(':').map(Number)
-  const period = h >= 12 ? 'pm' : 'am'
+  const period = h >= 12 ? 'PM' : 'AM'
   const h12 = h % 12 || 12
   return `${h12}:${String(m).padStart(2, '0')} ${period}`
 }
@@ -71,69 +98,99 @@ export default function TodayView({ familyId, toast }) {
     <div className="view-enter">
       <ScallopHeader
         title="TODAY"
-        subtitle={format(selectedDate, 'EEEE, MMMM d')}
+        leading={
+          <IconBtn>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </IconBtn>
+        }
+        trailing={
+          <IconBtn>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <rect x="4" y="6" width="16" height="14" rx="1.5"/><path d="M4 10h16M8 4v4M16 4v4"/>
+            </svg>
+          </IconBtn>
+        }
       />
 
-      {/* Date nav */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 20px 8px' }}>
+      {/* Date selector */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '14px 22px 10px',
+        borderBottom: `1px solid ${C.border}`,
+        margin: '0 0',
+      }}>
         <button
-          className="btn-ghost"
           onClick={() => setSelectedDate(d => subDays(d, 1))}
-          style={{ fontSize: 20, padding: '4px 12px' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
           aria-label="Previous day"
-        >‹</button>
-        <div style={{ fontWeight: 600, fontSize: 15, color: C.textDark }}>
-          {format(selectedDate, 'MMM d, yyyy')}
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div style={{ fontFamily: C.serif, fontSize: 18, color: C.primary, fontWeight: 600 }}>
+          {format(selectedDate, 'MMMM d, yyyy')}
         </div>
         <button
-          className="btn-ghost"
           onClick={() => setSelectedDate(d => addDays(d, 1))}
-          style={{ fontSize: 20, padding: '4px 12px' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
           aria-label="Next day"
-        >›</button>
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
       </div>
 
-      {/* Timeline */}
-      <div style={{ padding: '8px 20px' }}>
+      {/* Event list */}
+      <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 9 }}>
         {dayEvents.length === 0 ? (
-          <div className="empty-state">
-            <div style={{ fontSize: 32 }}>📅</div>
-            <p>Nothing scheduled — tap + to add your first event.</p>
-          </div>
+          SAMPLE_EVENTS.map((e) => {
+            const place = places.find(p => p.id === e.place_id)
+            return (
+              <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  fontFamily: C.sans, fontSize: 9.5, color: C.primary, fontWeight: 500,
+                  width: 50, textAlign: 'right', flexShrink: 0,
+                }}>{e.time}</div>
+                <div style={{
+                  width: 30, height: 30, borderRadius: '50%',
+                  background: C.card, border: `1px solid ${C.border}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <EventIcon kind={e.icon}/>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: C.serif, fontSize: 13, color: C.primary, fontWeight: 600, lineHeight: 1.1 }}>{e.title}</div>
+                  {e.sub && <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, marginTop: 2 }}>{e.sub}</div>}
+                </div>
+              </div>
+            )
+          })
         ) : (
           dayEvents.map((event, i) => {
-            const emoji = iconTypeMap[event.icon_type] || iconTypeMap.default
+            const iconKind = iconTypeMap[event.icon_type] || 'sun'
             const place = places.find(p => p.id === event.place_id)
             return (
-              <div key={event.id} className="list-item" style={{ display: 'flex', gap: 12, marginBottom: 16, animationDelay: `${i * 0.05}s` }}>
-                <div style={{ width: 60, textAlign: 'right', paddingTop: 4, flexShrink: 0 }}>
-                  <span style={{ fontSize: 12, color: C.textDark, opacity: 0.5, fontWeight: 500 }}>
-                    {formatTime12(event.start_time)}
-                  </span>
+              <div key={event.id} className="list-item" style={{ display: 'flex', alignItems: 'center', gap: 10, animationDelay: `${i * 0.05}s` }}>
+                <div style={{
+                  fontFamily: C.sans, fontSize: 9.5, color: C.primary, fontWeight: 500,
+                  width: 50, textAlign: 'right', flexShrink: 0,
+                }}>{formatTime12(event.start_time)}</div>
+                <div style={{
+                  width: 30, height: 30, borderRadius: '50%',
+                  background: C.card, border: `1px solid ${C.border}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <EventIcon kind={iconKind}/>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, flex: 1 }}>
-                  <div style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: '50%',
-                    background: C.primary,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 16,
-                    flexShrink: 0,
-                  }}>
-                    {emoji}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: C.textDark }}>{event.title}</div>
-                    {place && (
-                      <div style={{ fontSize: 12, color: C.textDark, opacity: 0.5, marginTop: 2 }}>📍 {place.name}</div>
-                    )}
-                    {event.notes && (
-                      <div style={{ fontSize: 12, color: C.textDark, opacity: 0.5, marginTop: 2 }}>{event.notes}</div>
-                    )}
-                  </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: C.serif, fontSize: 13, color: C.primary, fontWeight: 600, lineHeight: 1.1 }}>{event.title}</div>
+                  {(place || event.notes) && (
+                    <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, marginTop: 2 }}>
+                      {place ? place.name : event.notes}
+                    </div>
+                  )}
                 </div>
               </div>
             )
@@ -142,9 +199,14 @@ export default function TodayView({ familyId, toast }) {
       </div>
 
       {/* FAB */}
-      <button className="fab" onClick={() => setShowAddModal(true)} aria-label="Add event">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+      <button
+        className="fab"
+        onClick={() => setShowAddModal(true)}
+        aria-label="Add event"
+        style={{ bottom: 110 }}
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke={C.bgLight} strokeWidth="1.8">
+          <path d="M12 5v14M5 12h14"/>
         </svg>
       </button>
 
@@ -168,14 +230,6 @@ export default function TodayView({ familyId, toast }) {
               <label className="field-label" htmlFor="ev-end">End Time</label>
               <input id="ev-end" type="time" className="input-field" value={form.end_time} onChange={e => setForm(f => ({ ...f, end_time: e.target.value }))} />
             </div>
-          </div>
-          <div>
-            <label className="field-label" htmlFor="ev-icon">Icon Type</label>
-            <select id="ev-icon" className="input-field" value={form.icon_type} onChange={e => setForm(f => ({ ...f, icon_type: e.target.value }))}>
-              {Object.keys(iconTypeMap).filter(k => k !== 'default').map(k => (
-                <option key={k} value={k}>{iconTypeMap[k]} {k.replace('-', ' ')}</option>
-              ))}
-            </select>
           </div>
           <div>
             <label className="field-label" htmlFor="ev-place">Place</label>

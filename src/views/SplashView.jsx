@@ -1,136 +1,109 @@
-import { useState } from 'react'
 import C from '../colors'
 
-const DachshundSVG = () => (
-  <svg width="90" height="55" viewBox="0 0 82 50" fill={C.accent} aria-hidden="true">
-    {/* Tail curves up from rump */}
-    <path d="M14,25 C10,18 8,11 11,8 C14,6 16,10 15,19 Z" />
-    {/* Body */}
-    <ellipse cx="34" cy="27" rx="21" ry="10" />
-    {/* Neck */}
-    <ellipse cx="54" cy="22" rx="8" ry="7" />
-    {/* Head */}
-    <circle cx="65" cy="18" r="9" />
-    {/* Snout */}
-    <ellipse cx="76" cy="23" rx="8" ry="5" />
-    {/* Floppy ear */}
-    <ellipse cx="62" cy="28" rx="5" ry="9" />
-    {/* Front legs */}
-    <rect x="48" y="27" width="5" height="18" rx="2.5" />
-    <rect x="56" y="27" width="5" height="18" rx="2.5" />
-    {/* Back legs */}
-    <rect x="21" y="28" width="5" height="17" rx="2.5" />
-    <rect x="29" y="28" width="5" height="17" rx="2.5" />
-  </svg>
-)
-
-const CheckIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.primary} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12" />
-  </svg>
-)
-
-const slides = [0, 1, 2]
+function Divider({ width = 100 }) {
+  const mid = width / 2
+  return (
+    <svg width={width} height="12" viewBox={`0 0 ${width} 12`} style={{ display: 'block' }}>
+      <line x1="0" y1="6" x2={mid - 8} y2="6" stroke="#B5986A" strokeWidth="0.6"/>
+      <line x1={mid + 8} y1="6" x2={width} y2="6" stroke="#B5986A" strokeWidth="0.6"/>
+      <g transform={`translate(${mid}, 6) rotate(45)`}>
+        <rect x="-3" y="-3" width="6" height="6" fill="none" stroke="#B5986A" strokeWidth="0.7"/>
+      </g>
+    </svg>
+  )
+}
 
 export default function SplashView({ onDone }) {
-  const [slide, setSlide] = useState(0)
-
   const handleDone = (mode) => {
     localStorage.setItem('tdt_splash', '1')
     onDone(mode)
   }
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: C.bg, overflow: 'hidden', position: 'relative', maxWidth: 430, margin: '0 auto' }}>
+    <div style={{
+      height: '100vh',
+      background: C.bg,
+      overflow: 'hidden',
+      position: 'relative',
+      maxWidth: 430,
+      margin: '0 auto',
+      display: 'flex',
+      flexDirection: 'column',
+    }}>
+      {/* Striped awning at top */}
+      <img
+        src="/awning-striped.png"
+        alt=""
+        style={{
+          position: 'absolute', top: 0, left: 0,
+          width: '100%', height: 'auto', display: 'block', pointerEvents: 'none',
+          filter: 'drop-shadow(0 8px 10px rgba(40,30,15,0.18)) drop-shadow(0 2px 3px rgba(40,30,15,0.12))',
+        }}
+      />
 
-      {/* Slide 0 */}
-      {slide === 0 && (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ background: C.primary, flex: '0 0 42%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-            <DachshundSVG />
-            <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 28, fontWeight: 700, color: C.accent, letterSpacing: '0.1em', textAlign: 'center' }}>
-              THE DAILY TROT
-            </div>
-          </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', gap: 12 }}>
-            <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 26, fontWeight: 700, color: C.textDark, textAlign: 'center' }}>
-              Your Day. Your Family.
-            </div>
-            <div style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: 16, color: C.primary, opacity: 0.7, textAlign: 'center' }}>
-              We've got the rest.
-            </div>
-            <div style={{ width: 48, height: 2, background: C.accent, borderRadius: 1, marginTop: 8 }} />
-            <button className="btn-primary" style={{ marginTop: 24 }} onClick={() => setSlide(1)}>
-              CONTINUE
-            </button>
-          </div>
+      {/* Content column */}
+      <div style={{
+        paddingTop: 180,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        flex: 1,
+      }}>
+        <img src="/dachshund-mark.png" alt="Daily Trot" style={{ width: 58, height: 'auto', display: 'block' }}/>
+        <div style={{
+          fontFamily: C.serif, fontSize: 15, letterSpacing: '0.22em',
+          color: C.primary, marginTop: 18, fontWeight: 500,
+        }}>THE</div>
+        <div style={{
+          fontFamily: C.serif, fontSize: 32, letterSpacing: '0.08em',
+          color: C.primary, fontWeight: 700, marginTop: 2, lineHeight: 1,
+        }}>DAILY TROT</div>
+        <div style={{ marginTop: 20 }}><Divider width={100}/></div>
+        <div style={{
+          fontFamily: C.serif, fontSize: 18,
+          color: C.primary, marginTop: 18, fontWeight: 500,
+        }}>Simple plans.</div>
+        <div style={{
+          fontFamily: C.serif, fontStyle: 'italic', fontSize: 18,
+          color: C.primary, marginTop: 2, fontWeight: 500,
+        }}>Smoother days.</div>
+        <img
+          src="/scene-vignette.png"
+          alt=""
+          style={{ marginTop: 24, width: 220, display: 'block' }}
+        />
+        {/* Pagination dots */}
+        <div style={{ marginTop: 18, display: 'flex', gap: 6 }}>
+          <div style={{ width: 5, height: 5, borderRadius: '50%', background: C.primary }}/>
+          <div style={{ width: 5, height: 5, borderRadius: '50%', background: C.primary, opacity: 0.25 }}/>
+          <div style={{ width: 5, height: 5, borderRadius: '50%', background: C.primary, opacity: 0.25 }}/>
         </div>
-      )}
+      </div>
 
-      {/* Slide 1 */}
-      {slide === 1 && (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '52px 24px 32px' }}>
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{ fontSize: 48, lineHeight: 1.2, marginBottom: 16 }}>🧺 🐰 🎨</div>
-            <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 24, fontWeight: 700, color: C.textDark }}>
-              Simple plans.
-            </div>
-            <div style={{ fontFamily: 'Playfair Display, serif', fontStyle: 'italic', fontSize: 16, color: C.primary, marginTop: 4 }}>
-              Smoother days.
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
-            {[
-              'Schedule & Reminders',
-              'Packing Lists',
-              'Saved Places',
-              'Lillie AI Companion'
-            ].map(feat => (
-              <div key={feat} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.accentFaint, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <CheckIcon />
-                </div>
-                <span style={{ fontSize: 15, color: C.textDark, fontWeight: 500 }}>{feat}</span>
-              </div>
-            ))}
-          </div>
-          <button className="btn-primary" onClick={() => setSlide(2)}>
-            NEXT
-          </button>
-        </div>
-      )}
-
-      {/* Slide 2 */}
-      {slide === 2 && (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '52px 24px 32px', gap: 16 }}>
-          <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 26, fontWeight: 700, color: C.textDark, textAlign: 'center' }}>
-            Ready to get started?
-          </div>
-          <div style={{ fontSize: 15, color: C.textDark, opacity: 0.6, textAlign: 'center', lineHeight: 1.6 }}>
-            Plan your family's days, save your favorite spots, and let Lillie help with the rest.
-          </div>
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
-            <button className="btn-primary" onClick={() => handleDone('signup')}>
-              GET STARTED
-            </button>
-            <button className="btn-outline" onClick={() => handleDone('login')}>
-              I ALREADY HAVE AN ACCOUNT
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Dots */}
-      <div className="splash-dots" style={{ paddingBottom: 40 }}>
-        {slides.map(i => (
-          <div
-            key={i}
-            className={`splash-dot${slide === i ? ' active' : ''}`}
-            onClick={() => setSlide(i)}
-            role="button"
-            aria-label={`Go to slide ${i + 1}`}
-          />
-        ))}
+      {/* Pill buttons at bottom */}
+      <div style={{ padding: '0 26px 50px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <button
+          onClick={() => handleDone('signup')}
+          style={{
+            height: 46, borderRadius: 23,
+            background: C.primary, border: 'none',
+            color: C.bgLight,
+            fontFamily: C.sans, fontSize: 11.5, letterSpacing: '0.22em', fontWeight: 600,
+            cursor: 'pointer', whiteSpace: 'nowrap',
+          }}
+        >
+          GET STARTED
+        </button>
+        <button
+          onClick={() => handleDone('login')}
+          style={{
+            height: 46, borderRadius: 23,
+            background: 'transparent', border: `1px solid ${C.primary}`,
+            color: C.primary,
+            fontFamily: C.sans, fontSize: 11.5, letterSpacing: '0.22em', fontWeight: 600,
+            cursor: 'pointer', whiteSpace: 'nowrap',
+          }}
+        >
+          I ALREADY HAVE AN ACCOUNT
+        </button>
       </div>
     </div>
   )

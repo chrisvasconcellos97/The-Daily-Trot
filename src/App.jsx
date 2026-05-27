@@ -5,6 +5,7 @@ import { useToast } from './hooks/useToast'
 import { useFamily } from './hooks/useFamily'
 import Toast from './components/Toast'
 import BottomNav from './components/BottomNav'
+import SceneVignette from './components/SceneVignette'
 import SplashView from './views/SplashView'
 import AuthView from './views/AuthView'
 import HomeView from './views/HomeView'
@@ -15,6 +16,7 @@ import PlacesView from './views/PlacesView'
 import CommunityView from './views/CommunityView'
 import ProfileView from './views/ProfileView'
 import KidsView from './views/KidsView'
+import LibraryView from './views/LibraryView'
 import LillieView from './views/LillieView'
 
 function AppShell({ session }) {
@@ -47,8 +49,10 @@ function AppShell({ session }) {
             <Route path="/community" element={<CommunityView familyId={familyId} toast={toast} session={session} />} />
             <Route path="/profile" element={<ProfileView familyId={familyId} session={session} toast={toast} />} />
             <Route path="/kids" element={<KidsView familyId={familyId} toast={toast} />} />
+            <Route path="/library" element={<LibraryView familyId={familyId} toast={toast} />} />
           </Routes>
         </div>
+        <SceneVignette />
         <BottomNav onLillie={() => setLillieOpen(true)} familyId={familyId} />
       </div>
 
