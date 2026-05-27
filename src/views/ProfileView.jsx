@@ -42,6 +42,21 @@ export default function ProfileView({ familyId, session, toast }) {
           </svg>
         </button>
 
+        {/* Privacy & Data */}
+        <button
+          className="card"
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', border: 'none', marginBottom: 12, textAlign: 'left' }}
+          onClick={() => navigate('/privacy')}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 20 }}>🔒</span>
+            <span style={{ fontSize: 15, fontWeight: 600, color: C.textDark }}>Privacy & Data</span>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.textDark} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+
         <div className="divider" style={{ margin: '20px 0' }} />
 
         {/* Sign out */}

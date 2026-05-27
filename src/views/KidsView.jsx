@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
 import Modal from '../components/Modal'
 import { useChildren } from '../hooks/useChildren'
@@ -59,6 +60,7 @@ function calcAge(birthdateStr) {
 const emptyForm = { name: '', birthdate: '', color: '#E8C9A8' }
 
 export default function KidsView({ familyId, toast }) {
+  const navigate = useNavigate()
   const { children, addChild, updateChild, deleteChild } = useChildren(familyId)
   const [showAddModal, setShowAddModal] = useState(false)
   const [editChild, setEditChild] = useState(null)
@@ -192,6 +194,15 @@ export default function KidsView({ familyId, toast }) {
                 {child.birthdate && (
                   <div style={{ fontFamily: C.sans, fontSize: 10, color: C.inkMuted, marginTop: 3 }}>{calcAge(child.birthdate)}</div>
                 )}
+                <button
+                  onClick={e => { e.stopPropagation(); navigate(`/kids/${child.id}/health`) }}
+                  style={{
+                    marginTop: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    display: 'flex', alignItems: 'center', gap: 4,
+                  }}
+                >
+                  <span style={{ fontFamily: C.sans, fontSize: 10, color: C.gold, fontWeight: 600 }}>Health →</span>
+                </button>
               </div>
             </div>
           ))

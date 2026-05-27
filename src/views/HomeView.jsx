@@ -89,8 +89,8 @@ function TileIcon({ kind }) {
 
 const tiles = [
   { label: 'SCHEDULE',      icon: 'cal',   route: '/schedule' },
-  { label: 'MEALS',         icon: 'dish',  route: null },
-  { label: 'ACTIVITIES',    icon: 'abc',   route: null },
+  { label: 'GROCERY',       icon: 'cart',  route: '/grocery' },
+  { label: 'EVENTS',        icon: 'abc',   route: '/events' },
   { label: 'TASKS',         icon: 'clip',  route: null },
   { label: 'PACKING LISTS', icon: 'bag',   route: '/packing' },
   { label: 'PLACES',        icon: 'pin',   route: '/places' },
