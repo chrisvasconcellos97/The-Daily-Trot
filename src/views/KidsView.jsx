@@ -1,21 +1,52 @@
 import { useState } from 'react'
-import ScallopHeader from '../components/ScallopHeader'
+import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
 import Modal from '../components/Modal'
 import { useChildren } from '../hooks/useChildren'
 import C from '../colors'
 
+function Divider({ width = 60 }) {
+  const mid = width / 2
+  return (
+    <svg width={width} height="12" viewBox={`0 0 ${width} 12`} style={{ display: 'block' }}>
+      <line x1="0" y1="6" x2={mid - 8} y2="6" stroke="#B5986A" strokeWidth="0.6"/>
+      <line x1={mid + 8} y1="6" x2={width} y2="6" stroke="#B5986A" strokeWidth="0.6"/>
+      <g transform={`translate(${mid}, 6) rotate(45)`}>
+        <rect x="-3" y="-3" width="6" height="6" fill="none" stroke="#B5986A" strokeWidth="0.7"/>
+      </g>
+    </svg>
+  )
+}
+
+function KidAvatar({ color, name }) {
+  const bg = color || '#E8C9A8'
+  // Colors matching design spec per name
+  const greenDeep = '#16301F'
+  const goldDark = '#8A7244'
+  return (
+    <svg viewBox="0 0 60 60" width="52" height="52" style={{ borderRadius: '50%', display: 'block' }}>
+      <rect width="60" height="60" fill={bg}/>
+      <circle cx="30" cy="26" r="11" fill="#F4DBC2"/>
+      <ellipse cx="30" cy="48" rx="18" ry="14" fill={C.primary}/>
+      <circle cx="26" cy="25" r="1.2" fill={greenDeep}/>
+      <circle cx="34" cy="25" r="1.2" fill={greenDeep}/>
+      <path d="M27 30 Q30 32 33 30" stroke={greenDeep} strokeWidth="1" fill="none" strokeLinecap="round"/>
+      <path d="M19 22 Q22 14 30 14 Q38 14 41 22" fill={goldDark} opacity="0.8"/>
+    </svg>
+  )
+}
+
 const COLOR_SWATCHES = [
-  { label: 'Gold', value: '#C4A265' },
-  { label: 'Green', value: '#1E3D2F' },
+  { label: 'Warm', value: '#E8C9A8' },
+  { label: 'Tan', value: '#D4B894' },
+  { label: 'Light', value: '#EAD6B4' },
   { label: 'Sage', value: '#7A9E7E' },
   { label: 'Blush', value: '#E8A598' },
-  { label: 'Sky', value: '#7EB5D6' },
 ]
 
 function calcAge(birthdateStr) {
   if (!birthdateStr) return ''
   const birth = new Date(birthdateStr)
-  const now = new Date('2026-05-26')
+  const now = new Date()
   let years = now.getFullYear() - birth.getFullYear()
   let months = now.getMonth() - birth.getMonth()
   if (months < 0) { years--; months += 12 }
@@ -25,7 +56,7 @@ function calcAge(birthdateStr) {
   return `${years} year${years !== 1 ? 's' : ''} old`
 }
 
-const emptyForm = { name: '', birthdate: '', color: '#C4A265' }
+const emptyForm = { name: '', birthdate: '', color: '#E8C9A8' }
 
 export default function KidsView({ familyId, toast }) {
   const { children, addChild, updateChild, deleteChild } = useChildren(familyId)
@@ -34,10 +65,9 @@ export default function KidsView({ familyId, toast }) {
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(null)
 
   const openAdd = () => { setForm(emptyForm); setShowAddModal(true) }
-  const openEdit = (child) => { setEditChild(child); setForm({ name: child.name, birthdate: child.birthdate || '', color: child.color || '#C4A265' }) }
+  const openEdit = (child) => { setEditChild(child); setForm({ name: child.name, birthdate: child.birthdate || '', color: child.color || '#E8C9A8' }) }
   const closeEdit = () => { setEditChild(null); setForm(emptyForm) }
 
   const handleSave = async () => {
@@ -113,75 +143,77 @@ export default function KidsView({ familyId, toast }) {
 
   return (
     <div className="view-enter">
-      <ScallopHeader title="MY KIDS" />
-      <div style={{ padding: '32px 20px' }}>
+      <ScallopHeader
+        title="MY KIDS"
+        leading={
+          <IconBtn>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </IconBtn>
+        }
+        trailing={
+          <IconBtn>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+          </IconBtn>
+        }
+      />
+
+      {/* Centered divider */}
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 16 }}>
+        <Divider width={60}/>
+      </div>
+
+      <div style={{ padding: '14px 18px' }}>
         {children.length === 0 ? (
           <div className="empty-state">
-            <div style={{ fontSize: 40 }}>👶</div>
-            <p>No kids added yet.</p>
+            <p>No kids added yet — tap + to add one.</p>
           </div>
         ) : (
           children.map((child, i) => (
-            <div key={child.id} className="card list-item" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 14, animationDelay: `${i * 0.05}s` }}>
-              <div style={{
-                width: 52,
-                height: 52,
-                borderRadius: '50%',
-                background: child.color || C.accent,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 20,
-                fontWeight: 700,
-                color: C.white,
-                flexShrink: 0,
-              }}>
-                {child.name.charAt(0).toUpperCase()}
+            <div
+              key={child.id}
+              className="list-item"
+              style={{
+                marginBottom: 14, display: 'flex', alignItems: 'center', gap: 14,
+                background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
+                padding: '12px 16px', cursor: 'pointer',
+                animationDelay: `${i * 0.05}s`,
+              }}
+              onClick={() => openEdit(child)}
+            >
+              <div style={{ width: 52, height: 52, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+                <KidAvatar color={child.color} name={child.name}/>
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 18, fontWeight: 700, color: C.textDark }}>{child.name}</div>
+                <div style={{ fontFamily: C.serif, fontSize: 16, color: C.primary, fontWeight: 600 }}>{child.name}</div>
                 {child.birthdate && (
-                  <div style={{ fontSize: 13, color: C.textDark, opacity: 0.5 }}>{calcAge(child.birthdate)}</div>
+                  <div style={{ fontFamily: C.sans, fontSize: 10, color: C.inkMuted, marginTop: 3 }}>{calcAge(child.birthdate)}</div>
                 )}
               </div>
-              <button
-                className="btn-ghost"
-                style={{ padding: '6px 10px' }}
-                onClick={() => setMenuOpen(menuOpen === child.id ? null : child.id)}
-                aria-label="Options"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill={C.textDark} stroke="none">
-                  <circle cx="12" cy="5" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="12" cy="19" r="2" />
-                </svg>
-              </button>
-              {menuOpen === child.id && (
-                <div style={{
-                  position: 'absolute',
-                  right: 36,
-                  background: C.card,
-                  borderRadius: 10,
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-                  zIndex: 10,
-                  minWidth: 120,
-                  overflow: 'hidden',
-                }}>
-                  <button
-                    style={{ display: 'block', width: '100%', padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, textAlign: 'left', color: C.textDark }}
-                    onClick={() => { openEdit(child); setMenuOpen(null) }}
-                  >Edit</button>
-                  <button
-                    style={{ display: 'block', width: '100%', padding: '12px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14, textAlign: 'left', color: C.error }}
-                    onClick={() => { setConfirmDelete(child.id); setMenuOpen(null) }}
-                  >Delete</button>
-                </div>
-              )}
             </div>
           ))
         )}
 
-        <button className="btn-outline" style={{ marginTop: 16 }} onClick={openAdd}>
-          + Add Child
-        </button>
+        {/* Add Child row */}
+        <div
+          style={{
+            marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            padding: '14px 0', cursor: 'pointer',
+          }}
+          onClick={openAdd}
+        >
+          <div style={{
+            width: 22, height: 22, borderRadius: '50%',
+            border: `1.5px solid ${C.primary}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.primary,
+          }}>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+          <div style={{ fontFamily: C.serif, fontSize: 14, color: C.primary, fontWeight: 600 }}>Add Child</div>
+        </div>
       </div>
 
       {/* Add modal */}
@@ -197,7 +229,7 @@ export default function KidsView({ familyId, toast }) {
       {/* Delete confirm */}
       <Modal isOpen={!!confirmDelete} onClose={() => setConfirmDelete(null)} title="Remove this child?">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <p style={{ fontSize: 14, color: C.textDark, opacity: 0.7 }}>This will remove them from your family profile.</p>
+          <p style={{ fontSize: 14, color: C.ink, opacity: 0.7 }}>This will remove them from your family profile.</p>
           <button className="btn-primary" style={{ background: C.error }} onClick={handleDelete}>Yes, Remove</button>
           <button className="btn-ghost" onClick={() => setConfirmDelete(null)}>Cancel</button>
         </div>
