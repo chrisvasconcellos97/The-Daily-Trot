@@ -86,7 +86,7 @@ export default function PlacesView({ familyId, toast }) {
   return (
     <div className="view-enter">
       <ScallopHeader
-        title="PLACES"
+        title="MY PLACES"
         leading={
           <IconBtn>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

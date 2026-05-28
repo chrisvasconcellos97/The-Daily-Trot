@@ -105,7 +105,7 @@ const tiles = [
   { label: 'EVENTS',        icon: 'star',  route: '/events' },
   { label: 'TASKS',         icon: 'clip',  route: null },
   { label: 'PACKING LISTS', icon: 'bag',   route: '/packing' },
-  { label: 'PLACES',        icon: 'pin',   route: '/places' },
+  { label: 'MY PLACES',     icon: 'pin',   route: '/places' },
   { label: 'ROUTINES',      icon: 'clock', route: null },
   { label: 'RESOURCES',     icon: 'book',  route: null },
   { label: 'NOTES',         icon: 'note',  route: null },
