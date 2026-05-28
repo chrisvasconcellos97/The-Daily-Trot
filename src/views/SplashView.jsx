@@ -1,4 +1,5 @@
 import C from '../colors'
+import { AwningCream } from '../components/Awning'
 
 function Divider({ width = 100 }) {
   const mid = width / 2
@@ -30,20 +31,11 @@ export default function SplashView({ onDone }) {
       display: 'flex',
       flexDirection: 'column',
     }}>
-      {/* Striped awning at top */}
-      <img
-        src="/awning-striped.png"
-        alt=""
-        style={{
-          position: 'absolute', top: 0, left: 0,
-          width: '100%', height: 'auto', display: 'block', pointerEvents: 'none',
-          filter: 'drop-shadow(0 8px 10px rgba(40,30,15,0.18)) drop-shadow(0 2px 3px rgba(40,30,15,0.12))',
-        }}
-      />
+      <AwningCream/>
 
       {/* Content column */}
       <div style={{
-        paddingTop: 180,
+        paddingTop: 32,
         display: 'flex', flexDirection: 'column', alignItems: 'center',
         flex: 1,
       }}>
@@ -65,11 +57,6 @@ export default function SplashView({ onDone }) {
           fontFamily: C.serif, fontStyle: 'italic', fontSize: 18,
           color: C.primary, marginTop: 2, fontWeight: 500,
         }}>Smoother days.</div>
-        <img
-          src="/scene-vignette.png"
-          alt=""
-          style={{ marginTop: 24, width: 220, display: 'block' }}
-        />
         {/* Pagination dots */}
         <div style={{ marginTop: 18, display: 'flex', gap: 6 }}>
           <div style={{ width: 5, height: 5, borderRadius: '50%', background: C.primary }}/>

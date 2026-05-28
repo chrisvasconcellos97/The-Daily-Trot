@@ -1,4 +1,5 @@
 import C from '../colors'
+import { AwningGreen } from './Awning'
 
 function IconBtn({ children }) {
   return (
@@ -27,17 +28,10 @@ export default function ScallopHeader({ title, subtitle, leading, trailing, onBa
 
   return (
     <div style={{ position: 'relative', flexShrink: 0, width: '100%' }}>
-      <img
-        src="/awning-green.png"
-        alt=""
-        style={{
-          display: 'block', width: '100%', height: 'auto',
-          filter: 'drop-shadow(0 8px 10px rgba(40,30,15,0.18)) drop-shadow(0 2px 3px rgba(40,30,15,0.12))',
-        }}
-      />
+      <AwningGreen/>
       <div style={{
         position: 'absolute',
-        top: 'calc(35% - 18px)',
+        top: 'calc(34% - 18px)',
         left: 0, right: 0, height: 36,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 22px',
