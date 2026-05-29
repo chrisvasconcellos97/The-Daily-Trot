@@ -95,6 +95,16 @@ function TileIcon({ kind }) {
         <path d="M16 4l3 8h9l-7 5 3 8-8-5-8 5 3-8-7-5h9z"/>
       </svg>
     )
+    case 'scan': return (
+      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
+        <rect x="4" y="4" width="8" height="8" rx="1"/>
+        <rect x="20" y="4" width="8" height="8" rx="1"/>
+        <rect x="4" y="20" width="8" height="8" rx="1"/>
+        <path d="M20 20h2M24 20h4M20 24v4M24 24h4M24 28h4"/>
+        <line x1="14" y1="4" x2="14" y2="28" strokeWidth="1"/>
+        <line x1="17" y1="4" x2="17" y2="28" strokeWidth="2"/>
+      </svg>
+    )
     default: return null
   }
 }
@@ -103,7 +113,7 @@ const tiles = [
   { label: 'SCHEDULE',      icon: 'cal',   route: '/schedule' },
   { label: 'GROCERY',       icon: 'cart',  route: '/grocery' },
   { label: 'EVENTS',        icon: 'star',  route: '/events' },
-  { label: 'TASKS',         icon: 'clip',  route: null },
+  { label: 'SCANNER',       icon: 'scan',  route: '/scanner' },
   { label: 'PACKING LISTS', icon: 'bag',   route: '/packing' },
   { label: 'MY PLACES',     icon: 'pin',   route: '/places' },
   { label: 'ROUTINES',      icon: 'clock', route: null },

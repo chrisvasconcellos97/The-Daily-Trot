@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
 import { useGrocery } from '../hooks/useGrocery'
+import { useCleanScore } from '../hooks/useCleanScore'
 import C from '../colors'
 
 const CATEGORIES = ['All', 'Produce', 'Dairy', 'Meat', 'Bakery', 'Pantry', 'Other']
@@ -27,11 +28,19 @@ function CategoryDot({ category }) {
 export default function GroceryView({ familyId, toast }) {
   const navigate = useNavigate()
   const { items, loading, addItem, toggleItem, deleteItem, clearChecked } = useGrocery(familyId)
+  const { approvedSuggestions, fetchSuggestions } = useCleanScore(familyId)
   const [filter, setFilter] = useState('All')
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newCat, setNewCat] = useState('Other')
   const [saving, setSaving] = useState(false)
+  const [approvedSource, setApprovedSource] = useState(false)
+
+  useEffect(() => {
+    if (adding && newName.length >= 2) {
+      fetchSuggestions(newName)
+    }
+  }, [newName, adding, fetchSuggestions])
 
   const unchecked = useMemo(() =>
     items.filter(i => !i.checked && (filter === 'All' || i.category === filter)),
@@ -46,15 +55,21 @@ export default function GroceryView({ familyId, toast }) {
     if (!newName.trim()) return
     setSaving(true)
     try {
-      await addItem({ name: newName.trim(), category: newCat })
+      await addItem({ name: newName.trim(), category: newCat, approved_source: approvedSource })
       setNewName('')
       setNewCat('Other')
+      setApprovedSource(false)
       setAdding(false)
     } catch {
       toast('Could not add item', 'error')
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleSuggestionPick = (suggestion) => {
+    setNewName(suggestion.product_name || '')
+    setApprovedSource(true)
   }
 
   const handleCopy = () => {
@@ -140,43 +155,81 @@ export default function GroceryView({ familyId, toast }) {
         ))}
 
         {adding ? (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-            background: C.bgLight, border: `1px solid ${C.primary}`, borderRadius: 10, marginBottom: 8,
-          }}>
-            <input
-              autoFocus
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
-              placeholder="Item name..."
-              style={{
-                flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                fontFamily: C.serif, fontSize: 15, color: C.ink,
-              }}
-            />
-            <select
-              value={newCat}
-              onChange={e => setNewCat(e.target.value)}
-              style={{
-                border: `1px solid ${C.border}`, background: C.card, borderRadius: 8,
-                fontFamily: C.sans, fontSize: 11, color: C.inkSoft, padding: '3px 6px',
-              }}
-            >
-              {CATEGORIES.slice(1).map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <button
-              onClick={handleAdd}
-              disabled={saving}
-              style={{
-                background: C.primary, color: C.bgLight, border: 'none', borderRadius: 8,
-                padding: '4px 12px', fontFamily: C.sans, fontSize: 11, fontWeight: 600, cursor: 'pointer',
-              }}
-            >Add</button>
-            <button
-              onClick={() => setAdding(false)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkMuted, fontSize: 18 }}
-            >×</button>
+          <div style={{ marginBottom: 8 }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
+              background: C.bgLight, border: `1px solid ${C.primary}`, borderRadius: approvedSuggestions.length > 0 ? '10px 10px 0 0' : 10,
+            }}>
+              <input
+                autoFocus
+                value={newName}
+                onChange={e => { setNewName(e.target.value); setApprovedSource(false) }}
+                onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setAdding(false) }}
+                placeholder="Item name..."
+                style={{
+                  flex: 1, border: 'none', background: 'transparent', outline: 'none',
+                  fontFamily: C.serif, fontSize: 15, color: C.ink,
+                }}
+              />
+              {approvedSource && (
+                <span style={{ background: '#4A7C59', color: '#fff', fontFamily: C.sans, fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 6, letterSpacing: '0.08em', flexShrink: 0 }}>
+                  APPROVED
+                </span>
+              )}
+              <select
+                value={newCat}
+                onChange={e => setNewCat(e.target.value)}
+                style={{
+                  border: `1px solid ${C.border}`, background: C.card, borderRadius: 8,
+                  fontFamily: C.sans, fontSize: 11, color: C.inkSoft, padding: '3px 6px',
+                }}
+              >
+                {CATEGORIES.slice(1).map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <button
+                onClick={handleAdd}
+                disabled={saving}
+                style={{
+                  background: C.primary, color: C.bgLight, border: 'none', borderRadius: 8,
+                  padding: '4px 12px', fontFamily: C.sans, fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                }}
+              >Add</button>
+              <button
+                onClick={() => setAdding(false)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkMuted, fontSize: 18 }}
+              >×</button>
+            </div>
+            {approvedSuggestions.length > 0 && (
+              <div style={{
+                background: C.card, border: `1px solid ${C.primary}`, borderTop: 'none',
+                borderRadius: '0 0 10px 10px', overflow: 'hidden',
+              }}>
+                {approvedSuggestions.map((s, i) => (
+                  <button
+                    key={s.barcode || i}
+                    onClick={() => handleSuggestionPick(s)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '8px 14px', background: 'transparent', border: 'none',
+                      borderTop: i > 0 ? `1px solid ${C.border}` : 'none',
+                      cursor: 'pointer', textAlign: 'left',
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: C.serif, fontSize: 13, color: C.ink }}>{s.product_name}</div>
+                      {s.brand && <div style={{ fontFamily: C.sans, fontSize: 10, color: C.inkMuted }}>{s.brand}</div>}
+                    </div>
+                    {s.score != null && (
+                      <span style={{
+                        background: s.score >= 7 ? '#4A7C59' : s.score >= 4 ? '#B5986A' : '#C0392B',
+                        color: '#fff', fontFamily: C.sans, fontSize: 11, fontWeight: 700,
+                        padding: '2px 7px', borderRadius: 10, flexShrink: 0,
+                      }}>{s.score.toFixed(1)}</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <button
