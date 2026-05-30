@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import C from '../colors'
 import Lillie from '../components/Lillie'
 
@@ -74,7 +74,7 @@ export default function LillieView({ familyId, session, onClose }) {
       margin: '0 auto',
     }}>
       {/* Header */}
-      <ScallopHeader
+      <SimpleHeader
         title="LILLIE"
         leading={
           <button

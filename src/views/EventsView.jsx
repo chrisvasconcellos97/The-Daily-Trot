@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import Modal from '../components/Modal'
 import { useEvents } from '../hooks/useEvents'
 import C from '../colors'
@@ -127,7 +127,7 @@ export default function EventsView({ familyId, toast }) {
 
   return (
     <div className="view-enter" style={{ paddingBottom: 100 }}>
-      <ScallopHeader
+      <SimpleHeader
         title="EVENTS"
         leading={
           <IconBtn onClick={() => navigate(-1)} style={{ cursor: 'pointer' }}>

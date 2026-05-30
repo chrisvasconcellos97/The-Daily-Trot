@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format, addDays, subDays } from 'date-fns'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import Modal from '../components/Modal'
 import { useSchedule } from '../hooks/useSchedule'
 import { usePlaces } from '../hooks/usePlaces'
@@ -96,7 +96,7 @@ export default function TodayView({ familyId, toast }) {
 
   return (
     <div className="view-enter">
-      <ScallopHeader
+      <SimpleHeader
         title="TODAY"
         leading={
           <IconBtn>

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import C from '../colors'
 
 function Divider() {
@@ -42,7 +42,7 @@ export default function PrivacyView() {
 
   return (
     <div className="view-enter" style={{ paddingBottom: 60 }}>
-      <ScallopHeader
+      <SimpleHeader
         title="PRIVACY & DATA"
         leading={
           <IconBtn onClick={() => navigate(-1)} style={{ cursor: 'pointer' }}>

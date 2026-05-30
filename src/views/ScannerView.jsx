@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import { useCleanScore } from '../hooks/useCleanScore'
 import C from '../colors'
 
@@ -156,7 +156,7 @@ export default function ScannerView({ familyId, toast }) {
 
   return (
     <div className="view-enter" style={{ paddingBottom: 120 }}>
-      <ScallopHeader
+      <SimpleHeader
         title="CLEAN LILLIE"
         leading={
           <IconBtn onClick={() => navigate(-1)} style={{ cursor: 'pointer' }}>

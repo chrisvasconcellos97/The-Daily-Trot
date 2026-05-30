@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import Modal from '../components/Modal'
 import { useChildren } from '../hooks/useChildren'
 import C from '../colors'
@@ -218,7 +218,7 @@ export default function CommunityView({ familyId, toast, session }) {
 
   if (loading) return (
     <div className="view-enter">
-      <ScallopHeader title="COMMUNITY" />
+      <SimpleHeader title="COMMUNITY" />
       <div className="empty-state"><p>Loading...</p></div>
     </div>
   )
@@ -226,7 +226,7 @@ export default function CommunityView({ familyId, toast, session }) {
   if (!communityId || !community) {
     return (
       <div className="view-enter">
-        <ScallopHeader title="COMMUNITY" />
+        <SimpleHeader title="COMMUNITY" />
         <div style={{ padding: '60px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, textAlign: 'center' }}>
           <Lillie size={52} opacity={0.7} />
           <div style={{ fontFamily: C.serif, fontSize: 22, color: C.ink, fontWeight: 600, marginTop: 8 }}>Find your village.</div>
@@ -277,7 +277,7 @@ export default function CommunityView({ familyId, toast, session }) {
 
   return (
     <div className="view-enter" style={{ paddingBottom: 100 }}>
-      <ScallopHeader
+      <SimpleHeader
         title="COMMUNITY"
         trailing={
           <IconBtn onClick={() => setShowCode(true)} style={{ cursor: 'pointer' }}>

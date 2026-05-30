@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import ScallopHeader from '../components/ScallopHeader'
+import SimpleHeader from '../components/SimpleHeader'
 import C from '../colors'
 
 export default function ProfileView({ familyId, session, toast }) {
@@ -15,7 +15,7 @@ export default function ProfileView({ familyId, session, toast }) {
 
   return (
     <div className="view-enter">
-      <ScallopHeader title="PROFILE" />
+      <SimpleHeader title="PROFILE" />
       <div style={{ padding: '32px 20px' }}>
         {/* Account email */}
         <div className="card" style={{ marginBottom: 12 }}>

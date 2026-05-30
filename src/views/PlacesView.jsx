@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import Modal from '../components/Modal'
 import { usePlaces } from '../hooks/usePlaces'
 import C from '../colors'
@@ -85,7 +85,7 @@ export default function PlacesView({ familyId, toast }) {
 
   return (
     <div className="view-enter">
-      <ScallopHeader
+      <SimpleHeader
         title="MY PLACES"
         leading={
           <IconBtn>

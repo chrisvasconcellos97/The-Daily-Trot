@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import { useGrocery } from '../hooks/useGrocery'
 import { useCleanScore } from '../hooks/useCleanScore'
 import C from '../colors'
@@ -88,7 +88,7 @@ export default function GroceryView({ familyId, toast }) {
 
   return (
     <div className="view-enter" style={{ paddingBottom: 120 }}>
-      <ScallopHeader
+      <SimpleHeader
         title="GROCERY LIST"
         leading={
           <IconBtn onClick={() => navigate(-1)} style={{ cursor: 'pointer' }}>

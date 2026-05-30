@@ -5,7 +5,7 @@ import {
   startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths,
   isSameMonth, getDay,
 } from 'date-fns'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import Modal from '../components/Modal'
 import { useSchedule } from '../hooks/useSchedule'
 import { usePlaces } from '../hooks/usePlaces'
@@ -487,7 +487,7 @@ export default function ScheduleView({ familyId, toast }) {
 
   return (
     <div className="view-enter">
-      <ScallopHeader
+      <SimpleHeader
         title="SCHEDULE"
         leading={
           <IconBtn onClick={() => navigate(-1)}>

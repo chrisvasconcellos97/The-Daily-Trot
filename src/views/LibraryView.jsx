@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format, differenceInDays, parseISO, addWeeks } from 'date-fns'
-import ScallopHeader from '../components/ScallopHeader'
+import SimpleHeader from '../components/SimpleHeader'
 import { useLibrary } from '../hooks/useLibrary'
 import C from '../colors'
 
@@ -158,7 +158,7 @@ export default function LibraryView({ familyId, toast }) {
 
   return (
     <div className="view-enter">
-      <ScallopHeader title="LIBRARY" />
+      <SimpleHeader title="LIBRARY" />
 
       <div style={{ padding: '32px 16px 20px' }}>
 

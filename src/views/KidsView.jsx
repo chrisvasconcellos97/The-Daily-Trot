@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import Modal from '../components/Modal'
 import { useChildren } from '../hooks/useChildren'
 import C from '../colors'
@@ -147,7 +147,7 @@ export default function KidsView({ familyId, toast }) {
 
   return (
     <div className="view-enter">
-      <ScallopHeader
+      <SimpleHeader
         title="MY KIDS"
         leading={
           <IconBtn>

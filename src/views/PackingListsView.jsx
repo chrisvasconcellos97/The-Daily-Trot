@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import Modal from '../components/Modal'
 import { usePackingLists } from '../hooks/usePackingLists'
 import C from '../colors'
@@ -69,7 +69,7 @@ export default function PackingListsView({ familyId, toast }) {
     if (showSample) {
       return (
         <div className="view-enter">
-          <ScallopHeader
+          <SimpleHeader
             title="PACKING LIST"
             leading={
               <IconBtn>
@@ -169,7 +169,7 @@ export default function PackingListsView({ familyId, toast }) {
 
     return (
       <div className="view-enter">
-        <ScallopHeader
+        <SimpleHeader
           title="PACKING LISTS"
           leading={
             <IconBtn>
@@ -245,7 +245,7 @@ export default function PackingListsView({ familyId, toast }) {
   // ── Checklist view ──
   return (
     <div className="view-enter">
-      <ScallopHeader
+      <SimpleHeader
         title={currentList.name.toUpperCase()}
         leading={
           <IconBtn>

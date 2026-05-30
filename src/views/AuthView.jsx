@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import ScallopHeader from '../components/ScallopHeader'
+import SimpleHeader from '../components/SimpleHeader'
 import C from '../colors'
 
 export default function AuthView({ initialMode = 'login' }) {
@@ -45,7 +45,7 @@ export default function AuthView({ initialMode = 'login' }) {
 
   return (
     <div style={{ minHeight: '100vh', background: C.bg, display: 'flex', flexDirection: 'column' }}>
-      <ScallopHeader title="THE DAILY TROT" subtitle="Family planning, simplified." />
+      <SimpleHeader title="THE DAILY TROT" subtitle="Family planning, simplified." />
       <div style={{ flex: 1, padding: '40px 24px 32px' }}>
         {/* Tab switcher */}
         <div style={{ display: 'flex', background: 'rgba(30,61,47,0.06)', borderRadius: 10, padding: 4, marginBottom: 28 }}>

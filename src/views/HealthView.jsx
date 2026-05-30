@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import Modal from '../components/Modal'
 import { useHealth } from '../hooks/useHealth'
 import { useChildren } from '../hooks/useChildren'
@@ -142,7 +142,7 @@ export default function HealthView({ familyId, toast }) {
 
   return (
     <div className="view-enter" style={{ paddingBottom: 100 }}>
-      <ScallopHeader
+      <SimpleHeader
         subtitle={child?.name?.toUpperCase() || 'CHILD'}
         title="HEALTH"
         leading={
