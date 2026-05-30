@@ -1,7 +1,7 @@
 const W = 390, N = 5, scW = W / N
 const bodyH = 105
 const scR = scW * 0.5
-const svgH = bodyH + scR + 48
+const svgH = bodyH + scR + 4
 const k = 0.5523
 const MOUNT = '#112217'
 
@@ -20,11 +20,6 @@ function AwningBase({ colors, uid }) {
       style={{ display: 'block', width: '100%', height: 'auto' }}
     >
       <defs>
-        <linearGradient id={`${uid}-shadow`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor="rgba(0,0,0,0.22)"/>
-          <stop offset="40%"  stopColor="rgba(0,0,0,0.08)"/>
-          <stop offset="100%" stopColor="rgba(0,0,0,0)"/>
-        </linearGradient>
         {colors.map((_, i) => (
           <linearGradient key={i} id={`${uid}-c${i}`} x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%"   stopColor="rgba(0,0,0,0.18)"/>
@@ -59,10 +54,6 @@ function AwningBase({ colors, uid }) {
 
       <rect x="0" y={bodyH} width={W} height={scR + 10}
             fill="rgba(0,0,0,0.15)" clipPath={`url(#${uid}-sc)`}/>
-
-      {/* Cast shadow — fades to nothing below the scallop tips */}
-      <rect x="0" y={bodyH + scR - 4} width={W} height="52"
-            fill={`url(#${uid}-shadow)`}/>
 
       <rect x="0" y="0" width={W} height="12" fill={MOUNT}/>
     </svg>

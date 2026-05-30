@@ -27,8 +27,6 @@ export default function SplashView({ onDone }) {
       background: C.bg,
       overflow: 'hidden',
       position: 'relative',
-      maxWidth: 430,
-      margin: '0 auto',
       display: 'flex',
       flexDirection: 'column',
     }}>
@@ -71,11 +69,11 @@ export default function SplashView({ onDone }) {
         <button
           onClick={() => handleDone('signup')}
           style={{
-            height: 46, borderRadius: 23,
+            width: '100%', height: 46, borderRadius: 23,
             background: C.primary, border: 'none',
             color: C.bgLight,
             fontFamily: C.sans, fontSize: 11.5, letterSpacing: '0.22em', fontWeight: 600,
-            cursor: 'pointer', whiteSpace: 'nowrap',
+            cursor: 'pointer',
           }}
         >
           GET STARTED
@@ -83,11 +81,11 @@ export default function SplashView({ onDone }) {
         <button
           onClick={() => handleDone('login')}
           style={{
-            height: 46, borderRadius: 23,
+            width: '100%', height: 46, borderRadius: 23,
             background: 'transparent', border: `1px solid ${C.primary}`,
             color: C.primary,
-            fontFamily: C.sans, fontSize: 11.5, letterSpacing: '0.22em', fontWeight: 600,
-            cursor: 'pointer', whiteSpace: 'nowrap',
+            fontFamily: C.sans, fontSize: 11, letterSpacing: '0.12em', fontWeight: 600,
+            cursor: 'pointer',
           }}
         >
           I ALREADY HAVE AN ACCOUNT
