@@ -1,14 +1,20 @@
 import C from '../colors'
 import { AwningGreen } from './Awning'
 
-function IconBtn({ children }) {
+function IconBtn({ children, onClick, style, ...rest }) {
   return (
-    <div style={{
-      width: 30, height: 30, borderRadius: '50%',
-      border: `1px solid ${C.goldLight}`,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: C.bgLight,
-    }}>
+    <div
+      onClick={onClick}
+      style={{
+        width: 30, height: 30, borderRadius: '50%',
+        border: `1px solid ${C.goldLight}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: C.bgLight,
+        cursor: onClick ? 'pointer' : 'default',
+        ...style,
+      }}
+      {...rest}
+    >
       {children}
     </div>
   )

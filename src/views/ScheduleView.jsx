@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   format, addDays, addWeeks, subWeeks, startOfWeek, isSameDay,
   startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths,
@@ -117,6 +118,7 @@ function NoSchoolBanner({ closures }) {
 }
 
 export default function ScheduleView({ familyId, toast }) {
+  const navigate = useNavigate()
   const today = new Date()
   const [viewMode, setViewMode] = useState('week')
   const [monthDate, setMonthDate] = useState(today)
@@ -488,7 +490,7 @@ export default function ScheduleView({ familyId, toast }) {
       <ScallopHeader
         title="SCHEDULE"
         leading={
-          <IconBtn>
+          <IconBtn onClick={() => navigate(-1)}>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6"/>
             </svg>
