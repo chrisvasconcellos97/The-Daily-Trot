@@ -187,7 +187,7 @@ export default function LillieView({ familyId, session, onClose }) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
             }}>
-              <img src="/dachshund-mark.png" alt="Lillie" style={{ width: 20, height: 'auto' }}/>
+              <Lillie size={20} />
             </div>
             <div style={{
               padding: '12px 16px',
