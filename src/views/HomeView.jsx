@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
+import Lillie from '../components/Lillie'
 import { useSchedule } from '../hooks/useSchedule'
 import { useChildren } from '../hooks/useChildren'
 import C from '../colors'
@@ -220,7 +221,7 @@ export default function HomeView({ familyId, session, toast }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
         }}>
-          <img src="/dachshund-mark.png" alt="Lillie" style={{ width: 26, height: 'auto' }}/>
+          <Lillie size={26} />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{

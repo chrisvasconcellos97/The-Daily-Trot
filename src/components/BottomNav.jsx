@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import C from '../colors'
+import Lillie from './Lillie'
 
 export default function BottomNav({ onLillie }) {
   const navigate = useNavigate()
@@ -56,7 +57,7 @@ export default function BottomNav({ onLillie }) {
           onClick={onLillie}
           aria-label="Open Lillie AI"
         >
-          <img src="/dachshund-mark.png" alt="Lillie" style={{ width: 42, height: 'auto' }}/>
+          <Lillie size={38} shield />
         </button>
       </div>
       <Item id="community" label="COMMUNITY" onClick={() => navigate('/community')} icon={

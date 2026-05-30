@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
 import C from '../colors'
+import Lillie from '../components/Lillie'
 
 function PromptIcon({ kind }) {
   const s = { fill: 'none', stroke: C.primary, strokeWidth: 1.3, strokeLinecap: 'round', strokeLinejoin: 'round' }
@@ -112,7 +113,7 @@ export default function LillieView({ familyId, session, onClose }) {
                 background: C.bgLight,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <img src="/dachshund-mark.png" alt="Lillie" style={{ width: 54, height: 'auto' }}/>
+                <Lillie size={54} />
               </div>
               <div style={{ fontFamily: C.serif, fontSize: 18, color: C.ink, fontWeight: 600, marginTop: 14 }}>Hi {firstName}!</div>
               <div style={{ fontFamily: C.serif, fontSize: 13, color: C.inkSoft, marginTop: 2 }}>How can I help you today?</div>
@@ -156,7 +157,7 @@ export default function LillieView({ familyId, session, onClose }) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 flexShrink: 0,
               }}>
-                <img src="/dachshund-mark.png" alt="Lillie" style={{ width: 20, height: 'auto' }}/>
+                <Lillie size={20} />
               </div>
             )}
             <div

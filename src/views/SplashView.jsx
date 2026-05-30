@@ -1,5 +1,6 @@
 import C from '../colors'
 import { AwningCream } from '../components/Awning'
+import Lillie from '../components/Lillie'
 
 function Divider({ width = 100 }) {
   const mid = width / 2
@@ -39,7 +40,7 @@ export default function SplashView({ onDone }) {
         display: 'flex', flexDirection: 'column', alignItems: 'center',
         flex: 1,
       }}>
-        <img src="/dachshund-mark.png" alt="Daily Trot" style={{ width: 58, height: 'auto', display: 'block' }}/>
+        <Lillie size={58} />
         <div style={{
           fontFamily: C.serif, fontSize: 15, letterSpacing: '0.22em',
           color: C.primary, marginTop: 18, fontWeight: 500,

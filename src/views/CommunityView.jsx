@@ -4,6 +4,7 @@ import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
 import Modal from '../components/Modal'
 import { useChildren } from '../hooks/useChildren'
 import C from '../colors'
+import Lillie from '../components/Lillie'
 
 function randomCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -227,7 +228,7 @@ export default function CommunityView({ familyId, toast, session }) {
       <div className="view-enter">
         <ScallopHeader title="COMMUNITY" />
         <div style={{ padding: '60px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, textAlign: 'center' }}>
-          <img src="/dachshund-mark.png" alt="" style={{ width: 52, height: 'auto', opacity: 0.7 }} />
+          <Lillie size={52} opacity={0.7} />
           <div style={{ fontFamily: C.serif, fontSize: 22, color: C.ink, fontWeight: 600, marginTop: 8 }}>Find your village.</div>
           <div style={{ fontFamily: C.sans, fontSize: 13, color: C.inkSoft, lineHeight: 1.6 }}>
             Create a group or join one with an invite code.
