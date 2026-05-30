@@ -59,6 +59,47 @@ function calcAge(birthdateStr) {
 
 const emptyForm = { name: '', birthdate: '', color: '#E8C9A8' }
 
+function ChildForm({ form, setForm, handleSave, saving, editChild, setConfirmDelete, closeEdit }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div>
+        <label className="field-label" htmlFor="kid-name">Name *</label>
+        <input id="kid-name" className="input-field" placeholder="Child's name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+      </div>
+      <div>
+        <label className="field-label" htmlFor="kid-bday">Birthdate</label>
+        <input id="kid-bday" type="date" className="input-field" value={form.birthdate} onChange={e => setForm(f => ({ ...f, birthdate: e.target.value }))} />
+      </div>
+      <div>
+        <label className="field-label">Color</label>
+        <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
+          {COLOR_SWATCHES.map(s => (
+            <button
+              key={s.value}
+              className={`color-swatch${form.color === s.value ? ' selected' : ''}`}
+              style={{ background: s.value, border: form.color === s.value ? `3px solid ${C.primary}` : '3px solid transparent' }}
+              onClick={() => setForm(f => ({ ...f, color: s.value }))}
+              aria-label={s.label}
+            />
+          ))}
+        </div>
+      </div>
+      <button className="btn-primary" onClick={handleSave} disabled={saving}>
+        {saving ? 'Saving...' : editChild ? 'Save Changes' : 'Add Child'}
+      </button>
+      {editChild && (
+        <button
+          className="btn-ghost"
+          style={{ color: C.error }}
+          onClick={() => { setConfirmDelete(editChild.id); closeEdit() }}
+        >
+          Remove Child
+        </button>
+      )}
+    </div>
+  )
+}
+
 export default function KidsView({ familyId, toast }) {
   const navigate = useNavigate()
   const { children, addChild, updateChild, deleteChild } = useChildren(familyId)
@@ -103,45 +144,6 @@ export default function KidsView({ familyId, toast }) {
       toast('Could not delete', 'error')
     }
   }
-
-  const ChildForm = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div>
-        <label className="field-label" htmlFor="kid-name">Name *</label>
-        <input id="kid-name" className="input-field" placeholder="Child's name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-      </div>
-      <div>
-        <label className="field-label" htmlFor="kid-bday">Birthdate</label>
-        <input id="kid-bday" type="date" className="input-field" value={form.birthdate} onChange={e => setForm(f => ({ ...f, birthdate: e.target.value }))} />
-      </div>
-      <div>
-        <label className="field-label">Color</label>
-        <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
-          {COLOR_SWATCHES.map(s => (
-            <button
-              key={s.value}
-              className={`color-swatch${form.color === s.value ? ' selected' : ''}`}
-              style={{ background: s.value, border: form.color === s.value ? `3px solid ${C.primary}` : '3px solid transparent' }}
-              onClick={() => setForm(f => ({ ...f, color: s.value }))}
-              aria-label={s.label}
-            />
-          ))}
-        </div>
-      </div>
-      <button className="btn-primary" onClick={handleSave} disabled={saving}>
-        {saving ? 'Saving...' : editChild ? 'Save Changes' : 'Add Child'}
-      </button>
-      {editChild && (
-        <button
-          className="btn-ghost"
-          style={{ color: C.error }}
-          onClick={() => { setConfirmDelete(editChild.id); closeEdit() }}
-        >
-          Remove Child
-        </button>
-      )}
-    </div>
-  )
 
   return (
     <div className="view-enter">
@@ -229,12 +231,12 @@ export default function KidsView({ familyId, toast }) {
 
       {/* Add modal */}
       <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setForm(emptyForm) }} title="Add Child">
-        <ChildForm />
+        <ChildForm form={form} setForm={setForm} handleSave={handleSave} saving={saving} editChild={editChild} setConfirmDelete={setConfirmDelete} closeEdit={closeEdit} />
       </Modal>
 
       {/* Edit modal */}
       <Modal isOpen={!!editChild} onClose={closeEdit} title="Edit Child">
-        <ChildForm />
+        <ChildForm form={form} setForm={setForm} handleSave={handleSave} saving={saving} editChild={editChild} setConfirmDelete={setConfirmDelete} closeEdit={closeEdit} />
       </Modal>
 
       {/* Delete confirm */}

@@ -117,6 +117,271 @@ function NoSchoolBanner({ closures }) {
   )
 }
 
+// ── Month view ────────────────────────────────────────────────────────────
+function MonthView({ today, monthDate, setMonthDate, selectedDate, eventsForDate, getClosuresForDate, selectDay, places }) {
+  const monthStart = startOfMonth(monthDate)
+  const monthEnd = endOfMonth(monthDate)
+  const days = eachDayOfInterval({ start: monthStart, end: monthEnd })
+  // pad start: Mon=0 offset. getDay returns Sun=0, Mon=1... convert to Mon-first offset
+  const startPad = (getDay(monthStart) + 6) % 7
+  const cells = [...Array(startPad).fill(null), ...days]
+  // pad end to complete last row
+  while (cells.length % 7 !== 0) cells.push(null)
+
+  return (
+    <div style={{ padding: '14px 14px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <button onClick={() => setMonthDate(d => subMonths(d, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div style={{ fontFamily: C.serif, fontSize: 17, color: C.primary, fontWeight: 600 }}>
+          {format(monthDate, 'MMMM yyyy')}
+        </div>
+        <button onClick={() => setMonthDate(d => addMonths(d, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      {/* Day letter headers */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', textAlign: 'center', marginBottom: 6 }}>
+        {DAY_LETTERS.map((d, i) => (
+          <div key={i} style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, letterSpacing: '0.12em', paddingBottom: 4 }}>{d}</div>
+        ))}
+      </div>
+
+      {/* Date grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px 0' }}>
+        {cells.map((day, i) => {
+          if (!day) return <div key={i}/>
+          const dayStr = format(day, 'yyyy-MM-dd')
+          const isToday = isSameDay(day, today)
+          const isSelected = isSameDay(day, selectedDate)
+          const isCurrentMonth = isSameMonth(day, monthDate)
+          const dayEvts = eventsForDate(dayStr)
+          const dayClosure = getClosuresForDate(dayStr)
+          const hasNoSchool = dayClosure.some(c => c.closure_type === 'No School' || c.closure_type === 'Holiday')
+          const hasEarly = dayClosure.some(c => c.closure_type === 'Early Dismissal')
+
+          return (
+            <div
+              key={i}
+              onClick={() => selectDay(day, true)}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                cursor: 'pointer', padding: '3px 0',
+                opacity: isCurrentMonth ? 1 : 0.3,
+              }}
+            >
+              <div style={{
+                width: 28, height: 28, borderRadius: '50%',
+                background: isSelected ? C.primary : isToday ? C.card : 'transparent',
+                border: isToday && !isSelected ? `1.5px solid ${C.primary}` :
+                        hasNoSchool && !isSelected ? `1.5px solid #A85454` :
+                        hasEarly && !isSelected ? `1.5px solid ${C.gold}` : 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: C.serif, fontSize: 12, fontWeight: 600,
+                color: isSelected ? C.bgLight : C.primary,
+              }}>
+                {format(day, 'd')}
+              </div>
+              {/* Event dots */}
+              <div style={{ display: 'flex', gap: 2, marginTop: 2, height: 4 }}>
+                {dayEvts.slice(0, 3).map((_, j) => (
+                  <div key={j} style={{ width: 3, height: 3, borderRadius: '50%', background: C.gold }}/>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Selected day preview */}
+      <div style={{ marginTop: 16, borderTop: `1px solid ${C.border}`, paddingTop: 14 }}>
+        <div style={{ fontFamily: C.serif, fontSize: 14, color: C.primary, fontWeight: 600, marginBottom: 10 }}>
+          {format(selectedDate, 'EEEE, MMMM d')}
+        </div>
+        <NoSchoolBanner closures={getClosuresForDate(format(selectedDate, 'yyyy-MM-dd'))}/>
+        {eventsForDate(format(selectedDate, 'yyyy-MM-dd'))
+          .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
+          .map((e, i) => <EventRow key={e.id} event={e} places={places} animDelay={i * 0.05}/>)
+        }
+        {eventsForDate(format(selectedDate, 'yyyy-MM-dd')).length === 0 && (
+          <div style={{ fontFamily: C.sans, fontSize: 11, color: C.inkMuted, textAlign: 'center', padding: '12px 0' }}>
+            Nothing scheduled
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Week view ─────────────────────────────────────────────────────────────
+function WeekView({ today, weekStart, setWeekStart, selectedDate, selectDay, eventsForDate, places, getClosuresForDate }) {
+  const weekEnd = addDays(weekStart, 6)
+  const weekLabel = `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d')}`
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
+
+  return (
+    <div style={{ padding: '14px 14px 0' }}>
+      {/* Week nav */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <button onClick={() => setWeekStart(w => subWeeks(w, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div style={{ fontFamily: C.serif, fontSize: 15, color: C.primary, fontWeight: 600 }}>{weekLabel}</div>
+        <button onClick={() => setWeekStart(w => addWeeks(w, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      {/* Day columns header */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', textAlign: 'center', marginBottom: 8, borderBottom: `1px solid ${C.border}`, paddingBottom: 8 }}>
+        {weekDays.map((day, i) => {
+          const isToday = isSameDay(day, today)
+          const isSelected = isSameDay(day, selectedDate)
+          const dayClosure = getClosuresForDate(format(day, 'yyyy-MM-dd'))
+          const hasNoSchool = dayClosure.some(c => c.closure_type === 'No School' || c.closure_type === 'Holiday')
+          return (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+              <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, letterSpacing: '0.1em' }}>
+                {DAY_LETTERS[i]}
+              </div>
+              <button
+                onClick={() => selectDay(day)}
+                style={{
+                  width: 26, height: 26, borderRadius: '50%', border: 'none', cursor: 'pointer',
+                  background: isSelected ? C.primary : 'transparent',
+                  outline: isToday && !isSelected ? `1.5px solid ${C.primary}` :
+                           hasNoSchool && !isSelected ? `1.5px solid #A85454` : 'none',
+                  outlineOffset: -1,
+                  fontFamily: C.serif, fontSize: 12, fontWeight: 600,
+                  color: isSelected ? C.bgLight : C.primary,
+                }}
+              >{format(day, 'd')}</button>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Each day's events */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+        {weekDays.map((day, di) => {
+          const dayStr = format(day, 'yyyy-MM-dd')
+          const dayEvts = eventsForDate(dayStr).sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
+          const dayClosure = getClosuresForDate(dayStr)
+          const hasNoSchool = dayClosure.some(c => c.closure_type === 'No School' || c.closure_type === 'Holiday')
+          const hasEarly = dayClosure.some(c => c.closure_type === 'Early Dismissal')
+          const isToday = isSameDay(day, today)
+
+          if (dayEvts.length === 0 && !hasNoSchool && !hasEarly) return null
+
+          return (
+            <div key={di} style={{
+              borderBottom: `1px solid ${C.border}`, paddingBottom: 10, marginBottom: 10,
+            }}>
+              <div style={{
+                fontFamily: C.serif, fontSize: 12, color: isToday ? C.primary : C.inkSoft,
+                fontWeight: isToday ? 700 : 500, marginBottom: 6,
+                display: 'flex', alignItems: 'center', gap: 6,
+              }}>
+                {format(day, 'EEE, MMM d')}
+                {isToday && (
+                  <span style={{ fontFamily: C.sans, fontSize: 8, letterSpacing: '0.12em', color: C.bgLight, background: C.primary, borderRadius: 4, padding: '1px 5px' }}>TODAY</span>
+                )}
+              </div>
+              {(hasNoSchool || hasEarly) && (
+                <div style={{
+                  display: 'inline-block', padding: '2px 8px', borderRadius: 6,
+                  background: hasNoSchool ? '#A85454' : C.gold,
+                  fontFamily: C.sans, fontSize: 9, fontWeight: 700, color: '#fff', letterSpacing: '0.08em',
+                  marginBottom: 6,
+                }}>
+                  {hasNoSchool ? 'NO SCHOOL' : 'EARLY DISMISSAL'}
+                </div>
+              )}
+              {dayEvts.map(e => {
+                const iconKind = iconTypeMap[e.icon_type] || 'sun'
+                const place = places.find(p => p.id === e.place_id)
+                return (
+                  <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, width: 44, textAlign: 'right', flexShrink: 0 }}>
+                      {formatTime12(e.start_time)}
+                    </div>
+                    <div style={{ width: 22, height: 22, borderRadius: '50%', background: C.card, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <EventIcon kind={iconKind}/>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: C.serif, fontSize: 12, color: C.primary, fontWeight: 600, lineHeight: 1.1 }}>{e.title}</div>
+                      {(place || e.notes) && (
+                        <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted }}>{place ? place.name : e.notes}</div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })}
+        {weekDays.every(d => eventsForDate(format(d, 'yyyy-MM-dd')).length === 0) && (
+          <div style={{ textAlign: 'center', padding: '24px 0', fontFamily: C.sans, fontSize: 11, color: C.inkMuted }}>
+            No events this week
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Day view ──────────────────────────────────────────────────────────────
+function DayView({ selectedDate, setSelectedDate, eventsForDate, places, getClosuresForDate }) {
+  const dateStr = format(selectedDate, 'yyyy-MM-dd')
+  const dayEvents = eventsForDate(dateStr).sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
+  const dayClosure = getClosuresForDate(dateStr)
+
+  return (
+    <div style={{ padding: '14px 14px 0' }}>
+      {/* Day navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <button onClick={() => setSelectedDate(d => addDays(d, -1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontFamily: C.serif, fontSize: 17, color: C.primary, fontWeight: 600 }}>
+            {format(selectedDate, 'EEEE')}
+          </div>
+          <div style={{ fontFamily: C.sans, fontSize: 10, color: C.inkMuted, marginTop: 1 }}>
+            {format(selectedDate, 'MMMM d, yyyy')}
+          </div>
+        </div>
+        <button onClick={() => setSelectedDate(d => addDays(d, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <NoSchoolBanner closures={dayClosure}/>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: dayClosure.length ? 10 : 0 }}>
+        {dayEvents.length === 0 && dayClosure.length === 0 ? (
+          SAMPLE_EVENTS.map(e => (
+            <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: 0.4 }}>
+              <div style={{ fontFamily: C.sans, fontSize: 9.5, color: C.primary, fontWeight: 500, width: 50, textAlign: 'right', flexShrink: 0 }}>{formatTime12(e.start_time)}</div>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.card, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <EventIcon kind={e.icon}/>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: C.serif, fontSize: 13, color: C.primary, fontWeight: 600 }}>{e.title}</div>
+                {e.sub && <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, marginTop: 2 }}>{e.sub}</div>}
+              </div>
+            </div>
+          ))
+        ) : (
+          dayEvents.map((e, i) => <EventRow key={e.id} event={e} places={places} animDelay={i * 0.05}/>)
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function ScheduleView({ familyId, toast }) {
   const navigate = useNavigate()
   const today = new Date()
@@ -220,271 +485,6 @@ export default function ScheduleView({ familyId, toast }) {
     setAddMode(mode); setScanMode(mode === 'closure'); setPendingClosures([]); setShowAddModal(true)
   }
 
-  // ── Month view ────────────────────────────────────────────────────────────
-  function MonthView() {
-    const monthStart = startOfMonth(monthDate)
-    const monthEnd = endOfMonth(monthDate)
-    const days = eachDayOfInterval({ start: monthStart, end: monthEnd })
-    // pad start: Mon=0 offset. getDay returns Sun=0, Mon=1... convert to Mon-first offset
-    const startPad = (getDay(monthStart) + 6) % 7
-    const cells = [...Array(startPad).fill(null), ...days]
-    // pad end to complete last row
-    while (cells.length % 7 !== 0) cells.push(null)
-
-    return (
-      <div style={{ padding: '14px 14px 0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <button onClick={() => setMonthDate(d => subMonths(d, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <div style={{ fontFamily: C.serif, fontSize: 17, color: C.primary, fontWeight: 600 }}>
-            {format(monthDate, 'MMMM yyyy')}
-          </div>
-          <button onClick={() => setMonthDate(d => addMonths(d, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M9 6l6 6-6 6"/></svg>
-          </button>
-        </div>
-
-        {/* Day letter headers */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', textAlign: 'center', marginBottom: 6 }}>
-          {DAY_LETTERS.map((d, i) => (
-            <div key={i} style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, letterSpacing: '0.12em', paddingBottom: 4 }}>{d}</div>
-          ))}
-        </div>
-
-        {/* Date grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px 0' }}>
-          {cells.map((day, i) => {
-            if (!day) return <div key={i}/>
-            const dayStr = format(day, 'yyyy-MM-dd')
-            const isToday = isSameDay(day, today)
-            const isSelected = isSameDay(day, selectedDate)
-            const isCurrentMonth = isSameMonth(day, monthDate)
-            const dayEvts = eventsForDate(dayStr)
-            const dayClosure = getClosuresForDate(dayStr)
-            const hasNoSchool = dayClosure.some(c => c.closure_type === 'No School' || c.closure_type === 'Holiday')
-            const hasEarly = dayClosure.some(c => c.closure_type === 'Early Dismissal')
-
-            return (
-              <div
-                key={i}
-                onClick={() => selectDay(day, true)}
-                style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  cursor: 'pointer', padding: '3px 0',
-                  opacity: isCurrentMonth ? 1 : 0.3,
-                }}
-              >
-                <div style={{
-                  width: 28, height: 28, borderRadius: '50%',
-                  background: isSelected ? C.primary : isToday ? C.card : 'transparent',
-                  border: isToday && !isSelected ? `1.5px solid ${C.primary}` :
-                          hasNoSchool && !isSelected ? `1.5px solid #A85454` :
-                          hasEarly && !isSelected ? `1.5px solid ${C.gold}` : 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: C.serif, fontSize: 12, fontWeight: 600,
-                  color: isSelected ? C.bgLight : C.primary,
-                }}>
-                  {format(day, 'd')}
-                </div>
-                {/* Event dots */}
-                <div style={{ display: 'flex', gap: 2, marginTop: 2, height: 4 }}>
-                  {dayEvts.slice(0, 3).map((_, j) => (
-                    <div key={j} style={{ width: 3, height: 3, borderRadius: '50%', background: C.gold }}/>
-                  ))}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Selected day preview */}
-        <div style={{ marginTop: 16, borderTop: `1px solid ${C.border}`, paddingTop: 14 }}>
-          <div style={{ fontFamily: C.serif, fontSize: 14, color: C.primary, fontWeight: 600, marginBottom: 10 }}>
-            {format(selectedDate, 'EEEE, MMMM d')}
-          </div>
-          <NoSchoolBanner closures={getClosuresForDate(format(selectedDate, 'yyyy-MM-dd'))}/>
-          {eventsForDate(format(selectedDate, 'yyyy-MM-dd'))
-            .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
-            .map((e, i) => <EventRow key={e.id} event={e} places={places} animDelay={i * 0.05}/>)
-          }
-          {eventsForDate(format(selectedDate, 'yyyy-MM-dd')).length === 0 && (
-            <div style={{ fontFamily: C.sans, fontSize: 11, color: C.inkMuted, textAlign: 'center', padding: '12px 0' }}>
-              Nothing scheduled
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  // ── Week view ─────────────────────────────────────────────────────────────
-  function WeekView() {
-    const weekEnd = addDays(weekStart, 6)
-    const weekLabel = `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d')}`
-    const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
-
-    return (
-      <div style={{ padding: '14px 14px 0' }}>
-        {/* Week nav */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <button onClick={() => setWeekStart(w => subWeeks(w, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <div style={{ fontFamily: C.serif, fontSize: 15, color: C.primary, fontWeight: 600 }}>{weekLabel}</div>
-          <button onClick={() => setWeekStart(w => addWeeks(w, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M9 6l6 6-6 6"/></svg>
-          </button>
-        </div>
-
-        {/* Day columns header */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', textAlign: 'center', marginBottom: 8, borderBottom: `1px solid ${C.border}`, paddingBottom: 8 }}>
-          {weekDays.map((day, i) => {
-            const isToday = isSameDay(day, today)
-            const isSelected = isSameDay(day, selectedDate)
-            const dayClosure = getClosuresForDate(format(day, 'yyyy-MM-dd'))
-            const hasNoSchool = dayClosure.some(c => c.closure_type === 'No School' || c.closure_type === 'Holiday')
-            return (
-              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-                <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, letterSpacing: '0.1em' }}>
-                  {DAY_LETTERS[i]}
-                </div>
-                <button
-                  onClick={() => selectDay(day)}
-                  style={{
-                    width: 26, height: 26, borderRadius: '50%', border: 'none', cursor: 'pointer',
-                    background: isSelected ? C.primary : 'transparent',
-                    outline: isToday && !isSelected ? `1.5px solid ${C.primary}` :
-                             hasNoSchool && !isSelected ? `1.5px solid #A85454` : 'none',
-                    outlineOffset: -1,
-                    fontFamily: C.serif, fontSize: 12, fontWeight: 600,
-                    color: isSelected ? C.bgLight : C.primary,
-                  }}
-                >{format(day, 'd')}</button>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Each day's events */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-          {weekDays.map((day, di) => {
-            const dayStr = format(day, 'yyyy-MM-dd')
-            const dayEvts = eventsForDate(dayStr).sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
-            const dayClosure = getClosuresForDate(dayStr)
-            const hasNoSchool = dayClosure.some(c => c.closure_type === 'No School' || c.closure_type === 'Holiday')
-            const hasEarly = dayClosure.some(c => c.closure_type === 'Early Dismissal')
-            const isToday = isSameDay(day, today)
-
-            if (dayEvts.length === 0 && !hasNoSchool && !hasEarly) return null
-
-            return (
-              <div key={di} style={{
-                borderBottom: `1px solid ${C.border}`, paddingBottom: 10, marginBottom: 10,
-              }}>
-                <div style={{
-                  fontFamily: C.serif, fontSize: 12, color: isToday ? C.primary : C.inkSoft,
-                  fontWeight: isToday ? 700 : 500, marginBottom: 6,
-                  display: 'flex', alignItems: 'center', gap: 6,
-                }}>
-                  {format(day, 'EEE, MMM d')}
-                  {isToday && (
-                    <span style={{ fontFamily: C.sans, fontSize: 8, letterSpacing: '0.12em', color: C.bgLight, background: C.primary, borderRadius: 4, padding: '1px 5px' }}>TODAY</span>
-                  )}
-                </div>
-                {(hasNoSchool || hasEarly) && (
-                  <div style={{
-                    display: 'inline-block', padding: '2px 8px', borderRadius: 6,
-                    background: hasNoSchool ? '#A85454' : C.gold,
-                    fontFamily: C.sans, fontSize: 9, fontWeight: 700, color: '#fff', letterSpacing: '0.08em',
-                    marginBottom: 6,
-                  }}>
-                    {hasNoSchool ? 'NO SCHOOL' : 'EARLY DISMISSAL'}
-                  </div>
-                )}
-                {dayEvts.map(e => {
-                  const iconKind = iconTypeMap[e.icon_type] || 'sun'
-                  const place = places.find(p => p.id === e.place_id)
-                  return (
-                    <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                      <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, width: 44, textAlign: 'right', flexShrink: 0 }}>
-                        {formatTime12(e.start_time)}
-                      </div>
-                      <div style={{ width: 22, height: 22, borderRadius: '50%', background: C.card, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <EventIcon kind={iconKind}/>
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontFamily: C.serif, fontSize: 12, color: C.primary, fontWeight: 600, lineHeight: 1.1 }}>{e.title}</div>
-                        {(place || e.notes) && (
-                          <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted }}>{place ? place.name : e.notes}</div>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )
-          })}
-          {weekDays.every(d => eventsForDate(format(d, 'yyyy-MM-dd')).length === 0) && (
-            <div style={{ textAlign: 'center', padding: '24px 0', fontFamily: C.sans, fontSize: 11, color: C.inkMuted }}>
-              No events this week
-            </div>
-          )}
-        </div>
-      </div>
-    )
-  }
-
-  // ── Day view ──────────────────────────────────────────────────────────────
-  function DayView() {
-    const dateStr = format(selectedDate, 'yyyy-MM-dd')
-    const dayEvents = eventsForDate(dateStr).sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
-    const dayClosure = getClosuresForDate(dateStr)
-
-    return (
-      <div style={{ padding: '14px 14px 0' }}>
-        {/* Day navigation */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <button onClick={() => setSelectedDate(d => addDays(d, -1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: C.serif, fontSize: 17, color: C.primary, fontWeight: 600 }}>
-              {format(selectedDate, 'EEEE')}
-            </div>
-            <div style={{ fontFamily: C.sans, fontSize: 10, color: C.inkMuted, marginTop: 1 }}>
-              {format(selectedDate, 'MMMM d, yyyy')}
-            </div>
-          </div>
-          <button onClick={() => setSelectedDate(d => addDays(d, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6 }}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M9 6l6 6-6 6"/></svg>
-          </button>
-        </div>
-
-        <NoSchoolBanner closures={dayClosure}/>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: dayClosure.length ? 10 : 0 }}>
-          {dayEvents.length === 0 && dayClosure.length === 0 ? (
-            SAMPLE_EVENTS.map(e => (
-              <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: 0.4 }}>
-                <div style={{ fontFamily: C.sans, fontSize: 9.5, color: C.primary, fontWeight: 500, width: 50, textAlign: 'right', flexShrink: 0 }}>{formatTime12(e.start_time)}</div>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: C.card, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <EventIcon kind={e.icon}/>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: C.serif, fontSize: 13, color: C.primary, fontWeight: 600 }}>{e.title}</div>
-                  {e.sub && <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, marginTop: 2 }}>{e.sub}</div>}
-                </div>
-              </div>
-            ))
-          ) : (
-            dayEvents.map((e, i) => <EventRow key={e.id} event={e} places={places} animDelay={i * 0.05}/>)
-          )}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="view-enter">
       <ScallopHeader
@@ -510,9 +510,9 @@ export default function ScheduleView({ familyId, toast }) {
         <ViewToggle view={viewMode} onChange={handleViewChange}/>
       </div>
 
-      {viewMode === 'month' && <MonthView/>}
-      {viewMode === 'week' && <WeekView/>}
-      {viewMode === 'day' && <DayView/>}
+      {viewMode === 'month' && <MonthView today={today} monthDate={monthDate} setMonthDate={setMonthDate} selectedDate={selectedDate} eventsForDate={eventsForDate} getClosuresForDate={getClosuresForDate} selectDay={selectDay} places={places}/>}
+      {viewMode === 'week' && <WeekView today={today} weekStart={weekStart} setWeekStart={setWeekStart} selectedDate={selectedDate} selectDay={selectDay} eventsForDate={eventsForDate} places={places} getClosuresForDate={getClosuresForDate}/>}
+      {viewMode === 'day' && <DayView selectedDate={selectedDate} setSelectedDate={setSelectedDate} eventsForDate={eventsForDate} places={places} getClosuresForDate={getClosuresForDate}/>}
 
       {/* School closure chip */}
       {viewMode !== 'month' && (
