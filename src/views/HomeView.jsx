@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
-import ScallopHeader, { IconBtn } from '../components/ScallopHeader'
 import Lillie from '../components/Lillie'
 import { useSchedule } from '../hooks/useSchedule'
 import { useChildren } from '../hooks/useChildren'
@@ -149,24 +148,10 @@ export default function HomeView({ familyId, session, toast }) {
 
   return (
     <div className="view-enter">
-      <ScallopHeader
-        subtitle="THE"
-        title="DAILY TROT"
-        leading={
-          <IconBtn>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <circle cx="12" cy="12" r="10"/><path d="M7 9h10M7 13h10M7 17h7"/>
-            </svg>
-          </IconBtn>
-        }
-        trailing={
-          <IconBtn>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
-            </svg>
-          </IconBtn>
-        }
-      />
+      <div style={{ paddingTop: 52, paddingBottom: 4, textAlign: 'center' }}>
+        <div style={{ fontFamily: C.serif, fontSize: 11, letterSpacing: '0.32em', color: C.primary, opacity: 0.7 }}>THE</div>
+        <div style={{ fontFamily: C.serif, fontSize: 22, letterSpacing: '0.18em', color: C.primary, fontWeight: 700 }}>DAILY TROT</div>
+      </div>
 
       {/* Greeting */}
       <div style={{ paddingTop: 20, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
