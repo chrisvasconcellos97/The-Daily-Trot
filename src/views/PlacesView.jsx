@@ -1,8 +1,37 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import Modal from '../components/Modal'
 import { usePlaces } from '../hooks/usePlaces'
 import C from '../colors'
+
+const NOMINATIM = 'https://nominatim.openstreetmap.org/search'
+
+function useNominatim(query) {
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const timer = useRef(null)
+
+  useEffect(() => {
+    if (query.length < 3) { setResults([]); return }
+    clearTimeout(timer.current)
+    timer.current = setTimeout(async () => {
+      setLoading(true)
+      try {
+        const url = `${NOMINATIM}?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`
+        const res = await fetch(url, { headers: { 'Accept-Language': 'en', 'User-Agent': 'DailyTrotApp/1.0' } })
+        const data = await res.json()
+        setResults(data)
+      } catch {
+        setResults([])
+      } finally {
+        setLoading(false)
+      }
+    }, 500)
+    return () => clearTimeout(timer.current)
+  }, [query])
+
+  return { results, loading }
+}
 
 function CatIcon({ kind }) {
   const s = { fill: 'none', stroke: C.primary, strokeWidth: 1.4, strokeLinecap: 'round', strokeLinejoin: 'round' }
@@ -51,13 +80,18 @@ const SAMPLE_FAVORITES = [
 
 const ALL_CATS = ['all', 'library', 'gymnastics', 'art', 'music', 'park', 'other']
 
+const EMPTY_FORM = { name: '', category: 'other', address: '', lat: null, lng: null, website_url: '', notes: '' }
+
 export default function PlacesView({ familyId, toast }) {
   const { places, addPlace, toggleFavorite } = usePlaces(familyId)
   const [activeCategory, setActiveCategory] = useState('all')
   const [search, setSearch] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
-  const [form, setForm] = useState({ name: '', category: 'other', address: '', website_url: '', notes: '' })
+  const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [nameQuery, setNameQuery] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const { results, loading: searchLoading } = useNominatim(nameQuery)
 
   const filtered = places
     .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()))
@@ -66,6 +100,20 @@ export default function PlacesView({ familyId, toast }) {
   const favorites = filtered.filter(p => p.is_favorite)
   const rest = filtered.filter(p => !p.is_favorite)
 
+  const handleNameChange = (val) => {
+    setForm(f => ({ ...f, name: val, lat: null, lng: null }))
+    setNameQuery(val)
+    setShowSuggestions(true)
+  }
+
+  const pickSuggestion = (r) => {
+    const addr = r.display_name
+    const shortName = r.namedetails?.name || r.name || form.name
+    setForm(f => ({ ...f, name: shortName || f.name, address: addr, lat: parseFloat(r.lat), lng: parseFloat(r.lon) }))
+    setNameQuery('')
+    setShowSuggestions(false)
+  }
+
   const handleAddPlace = async () => {
     if (!form.name.trim()) { toast('Name is required', 'error'); return }
     setSaving(true)
@@ -73,7 +121,8 @@ export default function PlacesView({ familyId, toast }) {
       await addPlace({ ...form, is_favorite: false })
       toast('Place added!')
       setShowAddModal(false)
-      setForm({ name: '', category: 'other', address: '', website_url: '', notes: '' })
+      setForm(EMPTY_FORM)
+      setNameQuery('')
     } catch {
       toast('Could not add place', 'error')
     } finally {
@@ -224,12 +273,51 @@ export default function PlacesView({ familyId, toast }) {
         </svg>
       </button>
 
-      <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Add Place">
+      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setNameQuery(''); setShowSuggestions(false) }} title="Add Place">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
+          {/* Name with autocomplete */}
+          <div style={{ position: 'relative' }}>
             <label className="field-label" htmlFor="place-name">Name *</label>
-            <input id="place-name" className="input-field" placeholder="Place name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+            <input
+              id="place-name"
+              className="input-field"
+              placeholder="Search for a place..."
+              value={form.name}
+              onChange={e => handleNameChange(e.target.value)}
+              onFocus={() => nameQuery.length >= 3 && setShowSuggestions(true)}
+              autoComplete="off"
+            />
+            {showSuggestions && (results.length > 0 || searchLoading) && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+                background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.1)', marginTop: 4, overflow: 'hidden',
+              }}>
+                {searchLoading && (
+                  <div style={{ padding: '10px 14px', fontFamily: C.serif, fontSize: 12, color: C.inkMuted, fontStyle: 'italic' }}>Searching…</div>
+                )}
+                {results.map((r, i) => {
+                  const name = r.namedetails?.name || r.name || r.display_name.split(',')[0]
+                  const addr = r.display_name
+                  return (
+                    <button
+                      key={i}
+                      onMouseDown={() => pickSuggestion(r)}
+                      style={{
+                        width: '100%', textAlign: 'left', background: 'none', border: 'none',
+                        borderTop: i > 0 ? `1px solid ${C.border}` : 'none',
+                        padding: '10px 14px', cursor: 'pointer',
+                      }}
+                    >
+                      <div style={{ fontFamily: C.serif, fontSize: 12.5, color: C.ink, fontWeight: 600 }}>{name}</div>
+                      <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{addr}</div>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
+
           <div>
             <label className="field-label" htmlFor="place-cat">Category</label>
             <select id="place-cat" className="input-field" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
@@ -240,7 +328,7 @@ export default function PlacesView({ familyId, toast }) {
           </div>
           <div>
             <label className="field-label" htmlFor="place-addr">Address</label>
-            <input id="place-addr" className="input-field" placeholder="123 Main St" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} />
+            <input id="place-addr" className="input-field" placeholder="Auto-filled from search, or type manually" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} />
           </div>
           <div>
             <label className="field-label" htmlFor="place-url">Website URL</label>
