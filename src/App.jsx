@@ -5,7 +5,6 @@ import { useToast } from './hooks/useToast'
 import { useFamily } from './hooks/useFamily'
 import Toast from './components/Toast'
 import BottomNav from './components/BottomNav'
-import SceneVignette from './components/SceneVignette'
 import SplashView from './views/SplashView'
 import AuthView from './views/AuthView'
 import HomeView from './views/HomeView'
@@ -62,7 +61,6 @@ function AppShell({ session }) {
             <Route path="/privacy" element={<PrivacyView />} />
           </Routes>
         </div>
-        <SceneVignette />
         <BottomNav onLillie={() => setLillieOpen(true)} familyId={familyId} />
       </div>
 
