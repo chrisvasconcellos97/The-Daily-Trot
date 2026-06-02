@@ -23,6 +23,7 @@ import EventsView from './views/EventsView'
 import HealthView from './views/HealthView'
 import PrivacyView from './views/PrivacyView'
 import ScannerView from './views/ScannerView'
+import MealsView from './views/MealsView'
 
 function AppShell({ session }) {
   const { familyId, loading } = useFamily(session.user.id)
@@ -59,6 +60,7 @@ function AppShell({ session }) {
             <Route path="/events" element={<EventsView familyId={familyId} toast={toast} />} />
             <Route path="/kids/:childId/health" element={<HealthView familyId={familyId} toast={toast} session={session} />} />
             <Route path="/scanner" element={<ScannerView familyId={familyId} toast={toast} session={session} />} />
+            <Route path="/meals" element={<MealsView familyId={familyId} toast={toast} />} />
             <Route path="/privacy" element={<PrivacyView />} />
           </Routes>
         </div>
