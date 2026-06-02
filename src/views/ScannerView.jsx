@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import { useCleanScore } from '../hooks/useCleanScore'
 import C from '../colors'
+import { BrowserMultiFormatReader, NotFoundException } from '@zxing/browser'
 
 function ScoreRing({ score }) {
   const size = 120
@@ -79,8 +80,48 @@ export default function ScannerView({ familyId, toast }) {
   const [extractedIngredients, setExtractedIngredients] = useState([])
   const [ingEditText, setIngEditText] = useState('')
   const [ingScanning, setIngScanning] = useState(false)
+  const [photoScanning, setPhotoScanning] = useState(false)
+  const [cameraActive, setCameraActive] = useState(false)
   const fileRef = useRef(null)
   const ingFileRef = useRef(null)
+  const videoRef = useRef(null)
+  const cameraReaderRef = useRef(null)
+
+  // Stop camera stream on unmount or when cameraActive goes false
+  useEffect(() => {
+    if (!cameraActive) {
+      cameraReaderRef.current?.reset()
+      cameraReaderRef.current = null
+    }
+  }, [cameraActive])
+  useEffect(() => () => { cameraReaderRef.current?.reset() }, [])
+
+  const startCamera = useCallback(async () => {
+    setCameraActive(true)
+  }, [])
+
+  // Wire up ZXing continuous decode once video element is mounted
+  useEffect(() => {
+    if (!cameraActive || !videoRef.current) return
+    const reader = new BrowserMultiFormatReader()
+    cameraReaderRef.current = reader
+    reader.decodeFromConstraints(
+      { video: { facingMode: 'environment' } },
+      videoRef.current,
+      (result, err) => {
+        if (result) {
+          const bc = result.getText()
+          reader.reset()
+          setCameraActive(false)
+          scanBarcode(bc)
+        }
+        // NotFoundException fires on every frame with no barcode — ignore it
+      }
+    ).catch(() => {
+      setCameraActive(false)
+      toast('Camera access denied — enter barcode manually.', 'error')
+    })
+  }, [cameraActive, scanBarcode, toast])
 
   const handleManualScan = useCallback(async () => {
     const bc = manualBarcode.trim()
@@ -92,11 +133,25 @@ export default function ScannerView({ familyId, toast }) {
   const handlePhotoCapture = useCallback(async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    // For photo-based barcode, we just show a message — real barcode reading
-    // from a photo requires a library. Fall back to manual entry.
-    toast('Photo captured — enter the barcode number below for now.', 'success')
+    setPhotoScanning(true)
+    try {
+      const img = new Image()
+      const url = URL.createObjectURL(file)
+      img.src = url
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej })
+      const reader = new BrowserMultiFormatReader()
+      const result = await reader.decodeFromImageElement(img)
+      URL.revokeObjectURL(url)
+      const bc = result.getText()
+      await scanBarcode(bc)
+    } catch {
+      URL.revokeObjectURL?.()
+      toast("Couldn't read the barcode — try the live camera or enter it manually.", 'error')
+    } finally {
+      setPhotoScanning(false)
+    }
     e.target.value = ''
-  }, [toast])
+  }, [scanBarcode, toast])
 
   const handleIngPhotoCapture = useCallback(async (e) => {
     const file = e.target.files?.[0]
@@ -149,6 +204,7 @@ export default function ScannerView({ familyId, toast }) {
     setExtractedIngredients([])
     setIngEditText('')
     setManualBarcode('')
+    setCameraActive(false)
   }, [setResult])
 
   const scoreLabel = result?.score == null ? null : result.score >= 7 ? 'Great choice' : result.score >= 4 ? 'Use with caution' : 'Consider an alternative'
@@ -192,8 +248,53 @@ export default function ScannerView({ familyId, toast }) {
           </div>
         )}
 
+        {/* Live camera viewfinder */}
+        {cameraActive && !result && !scanning && (
+          <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 14, background: '#000' }}>
+            <video
+              ref={videoRef}
+              style={{ width: '100%', display: 'block', maxHeight: 320, objectFit: 'cover' }}
+              muted
+              playsInline
+            />
+            {/* Scan frame overlay */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              pointerEvents: 'none',
+            }}>
+              <div style={{ width: 220, height: 110, position: 'relative' }}>
+                {[['0%','0%','0%'], ['0%','auto','0%'], ['auto','0%','0%'], ['auto','auto','0%']].map(([t,b,l], i) => (
+                  <div key={i} style={{
+                    position: 'absolute', top: t !== 'auto' ? t : undefined, bottom: b !== 'auto' ? b : undefined,
+                    left: l !== 'auto' ? l : undefined, right: l === 'auto' ? '0%' : undefined,
+                    width: 24, height: 24,
+                    borderTop: (i < 2) ? `3px solid ${C.gold}` : 'none',
+                    borderBottom: (i >= 2) ? `3px solid ${C.gold}` : 'none',
+                    borderLeft: (i % 2 === 0) ? `3px solid ${C.gold}` : 'none',
+                    borderRight: (i % 2 !== 0) ? `3px solid ${C.gold}` : 'none',
+                  }}/>
+                ))}
+                <div style={{
+                  position: 'absolute', top: '50%', left: 0, right: 0, height: 2,
+                  background: C.gold, opacity: 0.7,
+                  transform: 'translateY(-50%)',
+                }}/>
+              </div>
+            </div>
+            <button
+              onClick={() => setCameraActive(false)}
+              style={{
+                position: 'absolute', top: 10, right: 10,
+                background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: 20,
+                padding: '5px 12px', fontFamily: C.sans, fontSize: 12, cursor: 'pointer',
+              }}
+            >Cancel</button>
+          </div>
+        )}
+
         {/* Idle / scan area */}
-        {!result && !scanning && (
+        {!result && !scanning && !cameraActive && (
           <>
             <div style={{
               background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
@@ -223,7 +324,20 @@ export default function ScannerView({ familyId, toast }) {
                 Check ingredients and recalls before you buy
               </div>
 
-              {/* Camera capture button */}
+              {/* Live camera button */}
+              <button
+                onClick={startCamera}
+                style={{
+                  width: '100%', padding: '13px', borderRadius: 23,
+                  background: C.primary, color: C.bgLight, border: 'none',
+                  fontFamily: C.sans, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  letterSpacing: '0.06em', marginBottom: 10,
+                }}
+              >
+                Scan with Camera
+              </button>
+
+              {/* Photo capture fallback (iOS-friendly) */}
               <input
                 ref={fileRef}
                 type="file"
@@ -234,14 +348,15 @@ export default function ScannerView({ familyId, toast }) {
               />
               <button
                 onClick={() => fileRef.current?.click()}
+                disabled={photoScanning}
                 style={{
-                  width: '100%', padding: '13px', borderRadius: 23,
-                  background: C.primary, color: C.bgLight, border: 'none',
+                  width: '100%', padding: '12px', borderRadius: 23,
+                  background: 'transparent', color: C.primary, border: `1px solid ${C.primary}`,
                   fontFamily: C.sans, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                  letterSpacing: '0.06em', marginBottom: 10,
+                  letterSpacing: '0.06em', opacity: photoScanning ? 0.5 : 1,
                 }}
               >
-                Open Camera
+                {photoScanning ? 'Reading barcode...' : 'Take a Photo Instead'}
               </button>
             </div>
 
