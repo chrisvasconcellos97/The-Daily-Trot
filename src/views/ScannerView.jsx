@@ -248,53 +248,43 @@ export default function ScannerView({ familyId, toast }) {
           </div>
         )}
 
-        {/* Live camera viewfinder */}
-        {cameraActive && !result && !scanning && (
-          <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 14, background: '#000' }}>
-            <video
-              ref={videoRef}
-              style={{ width: '100%', display: 'block', maxHeight: 320, objectFit: 'cover' }}
-              muted
-              playsInline
-            />
-            {/* Scan frame overlay */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              pointerEvents: 'none',
-            }}>
-              <div style={{ width: 220, height: 110, position: 'relative' }}>
-                {[['0%','0%','0%'], ['0%','auto','0%'], ['auto','0%','0%'], ['auto','auto','0%']].map(([t,b,l], i) => (
-                  <div key={i} style={{
-                    position: 'absolute', top: t !== 'auto' ? t : undefined, bottom: b !== 'auto' ? b : undefined,
-                    left: l !== 'auto' ? l : undefined, right: l === 'auto' ? '0%' : undefined,
-                    width: 24, height: 24,
-                    borderTop: (i < 2) ? `3px solid ${C.gold}` : 'none',
-                    borderBottom: (i >= 2) ? `3px solid ${C.gold}` : 'none',
-                    borderLeft: (i % 2 === 0) ? `3px solid ${C.gold}` : 'none',
-                    borderRight: (i % 2 !== 0) ? `3px solid ${C.gold}` : 'none',
-                  }}/>
-                ))}
-                <div style={{
-                  position: 'absolute', top: '50%', left: 0, right: 0, height: 2,
-                  background: C.gold, opacity: 0.7,
-                  transform: 'translateY(-50%)',
-                }}/>
-              </div>
+        {/* Live camera viewfinder — keep mounted even during scanning so video doesn't flash */}
+        <div style={{ display: cameraActive ? 'block' : 'none', position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 14, background: '#000' }}>
+          <video
+            ref={videoRef}
+            style={{ width: '100%', display: 'block', maxHeight: 340, objectFit: 'cover' }}
+            muted
+            autoPlay
+            playsInline
+          />
+          {/* Scan frame overlay */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            pointerEvents: 'none',
+          }}>
+            <div style={{ width: 220, height: 110, position: 'relative' }}>
+              {/* Four corners */}
+              <div style={{ position: 'absolute', top: 0, left: 0, width: 24, height: 24, borderTop: `3px solid ${C.gold}`, borderLeft: `3px solid ${C.gold}` }}/>
+              <div style={{ position: 'absolute', top: 0, right: 0, width: 24, height: 24, borderTop: `3px solid ${C.gold}`, borderRight: `3px solid ${C.gold}` }}/>
+              <div style={{ position: 'absolute', bottom: 0, left: 0, width: 24, height: 24, borderBottom: `3px solid ${C.gold}`, borderLeft: `3px solid ${C.gold}` }}/>
+              <div style={{ position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderBottom: `3px solid ${C.gold}`, borderRight: `3px solid ${C.gold}` }}/>
+              {/* Scan line */}
+              <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1.5, background: C.gold, opacity: 0.8, transform: 'translateY(-50%)' }}/>
             </div>
-            <button
-              onClick={() => setCameraActive(false)}
-              style={{
-                position: 'absolute', top: 10, right: 10,
-                background: 'rgba(0,0,0,0.5)', color: '#fff', border: 'none', borderRadius: 20,
-                padding: '5px 12px', fontFamily: C.sans, fontSize: 12, cursor: 'pointer',
-              }}
-            >Cancel</button>
           </div>
-        )}
+          <button
+            onClick={() => setCameraActive(false)}
+            style={{
+              position: 'absolute', top: 10, right: 10,
+              background: 'rgba(0,0,0,0.55)', color: '#fff', border: 'none', borderRadius: 20,
+              padding: '5px 14px', fontFamily: C.sans, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            }}
+          >Cancel</button>
+        </div>
 
         {/* Idle / scan area */}
-        {!result && !scanning && !cameraActive && (
+        {!result && !cameraActive && (
           <>
             <div style={{
               background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
