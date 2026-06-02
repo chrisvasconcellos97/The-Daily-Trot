@@ -5,6 +5,7 @@ import { useToast } from './hooks/useToast'
 import { useFamily } from './hooks/useFamily'
 import Toast from './components/Toast'
 import BottomNav from './components/BottomNav'
+import Lillie from './components/Lillie'
 import SplashView from './views/SplashView'
 import AuthView from './views/AuthView'
 import HomeView from './views/HomeView'
@@ -31,9 +32,9 @@ function AppShell({ session }) {
   if (loading) {
     return (
       <div className="app-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>🐕</div>
-          <div style={{ color: 'rgba(44,24,16,0.4)', fontSize: 14 }}>Loading your family...</div>
+        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+          <Lillie size={72} wagging />
+          <div style={{ color: 'rgba(44,24,16,0.4)', fontSize: 13, fontFamily: 'Cormorant Garamond, serif', letterSpacing: '0.08em' }}>Loading your family...</div>
         </div>
       </div>
     )
@@ -96,7 +97,7 @@ export default function App() {
   if (session === undefined) {
     return (
       <div className="app-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <div style={{ fontSize: 40 }}>🐕</div>
+        <Lillie size={72} wagging />
       </div>
     )
   }

@@ -246,6 +246,19 @@ body {
 
 .fab:active { transform: scale(0.93); }
 
+@keyframes tailWag {
+  0%   { transform: rotate(-4deg); }
+  50%  { transform: rotate(4deg); }
+  100% { transform: rotate(-4deg); }
+}
+
+.lillie-wag {
+  animation: tailWag 0.55s ease-in-out infinite;
+  transform-origin: 12% 65%;
+  display: block;
+}
+
+
 @keyframes slideUp {
   from { transform: translateY(100%); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
