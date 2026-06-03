@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { format, addDays, subDays } from 'date-fns'
-import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
+import { useState, useMemo } from 'react'
+import { format, addDays } from 'date-fns'
+import ViewHeader, { IconBtn } from '../components/ViewHeader'
 import Modal from '../components/Modal'
 import Lillie from '../components/Lillie'
 import { useSchedule } from '../hooks/useSchedule'
@@ -56,9 +56,13 @@ export default function TodayView({ familyId, toast }) {
   const { places } = usePlaces(familyId)
 
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
+  const todayStr = format(new Date(), 'yyyy-MM-dd')
   const dayEvents = eventsForDate(dateStr).sort((a, b) =>
     (a.start_time || '').localeCompare(b.start_time || '')
   )
+
+  // 7-day strip: today - 3 to today + 3
+  const weekDays = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(new Date(), i - 3)), [])
 
   const handleSave = async () => {
     if (!form.title.trim()) { toast('Title is required', 'error'); return }
@@ -85,87 +89,91 @@ export default function TodayView({ familyId, toast }) {
 
   return (
     <div className="view-enter">
-      <SimpleHeader
-        title="TODAY"
-        leading={
-          <IconBtn>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </IconBtn>
-        }
+      <ViewHeader
+        title={format(selectedDate, 'EEEE')}
+        subtitle={format(selectedDate, 'MMMM d, yyyy').toUpperCase()}
         trailing={
-          <IconBtn>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <rect x="4" y="6" width="16" height="14" rx="1.5"/><path d="M4 10h16M8 4v4M16 4v4"/>
-            </svg>
+          <IconBtn onClick={() => setShowAddModal(true)} aria-label="Add event">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
           </IconBtn>
         }
       />
 
-      {/* Date selector */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 22px 10px',
-        borderBottom: `1px solid ${C.border}`,
-        margin: '0 0',
-      }}>
-        <button
-          onClick={() => setSelectedDate(d => subDays(d, 1))}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
-          aria-label="Previous day"
-        >
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <div style={{ fontFamily: C.serif, fontSize: 18, color: C.primary, fontWeight: 600 }}>
-          {format(selectedDate, 'MMMM d, yyyy')}
-        </div>
-        <button
-          onClick={() => setSelectedDate(d => addDays(d, 1))}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
-          aria-label="Next day"
-        >
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke={C.primary} strokeWidth="1.6"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
+      {/* Week strip */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 16px 14px', borderBottom: `1px solid ${C.border}` }}>
+        {weekDays.map(day => {
+          const dStr = format(day, 'yyyy-MM-dd')
+          const isSelected = dStr === dateStr
+          const isToday = dStr === todayStr
+          const dayLabel = format(day, 'EEE').toUpperCase().charAt(0)
+          const dayNum = format(day, 'd')
+          return (
+            <button
+              key={dStr}
+              onClick={() => { setSelectedDate(day); setForm(f => ({ ...f, date: dStr })) }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px' }}
+            >
+              <div style={{ fontFamily: C.sans, fontSize: 8, letterSpacing: '0.12em', color: isSelected ? C.primary : C.inkMuted, fontWeight: 600 }}>{dayLabel}</div>
+              <div style={{
+                width: 34, height: 34, borderRadius: '50%',
+                background: isSelected ? C.primary : 'transparent',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'relative',
+              }}>
+                <div style={{ fontFamily: C.serif, fontSize: 16, fontWeight: 600, color: isSelected ? '#F6F0DE' : isToday ? C.primary : C.inkMuted }}>{dayNum}</div>
+                {isToday && !isSelected && (
+                  <div style={{ position: 'absolute', bottom: 3, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: '50%', background: C.gold }}/>
+                )}
+              </div>
+            </button>
+          )
+        })}
       </div>
 
-      {/* Event list */}
-      <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 9 }}>
+      {/* Event timeline */}
+      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 0 }}>
         {dayEvents.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-            <Lillie size={44} />
+            <Lillie size={44}/>
             <div style={{ fontFamily: C.serif, fontSize: 15, color: C.ink, opacity: 0.55 }}>Nothing scheduled — enjoy the quiet!</div>
             <div style={{ fontFamily: C.sans, fontSize: 11, color: C.inkMuted }}>Tap + to add an event</div>
           </div>
         ) : (
-          dayEvents.map((event, i) => {
-            const iconKind = iconTypeMap[event.icon_type] || 'sun'
-            const place = places.find(p => p.id === event.place_id)
-            return (
-              <div key={event.id} className="list-item" style={{ display: 'flex', alignItems: 'center', gap: 10, animationDelay: `${i * 0.05}s` }}>
-                <div style={{
-                  fontFamily: C.sans, fontSize: 9.5, color: C.primary, fontWeight: 500,
-                  width: 50, textAlign: 'right', flexShrink: 0,
-                }}>{formatTime12(event.start_time)}</div>
-                <div style={{
-                  width: 30, height: 30, borderRadius: '50%',
-                  background: C.card, border: `1px solid ${C.border}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  <EventIcon kind={iconKind}/>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: C.serif, fontSize: 13, color: C.primary, fontWeight: 600, lineHeight: 1.1 }}>{event.title}</div>
-                  {(place || event.notes) && (
-                    <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, marginTop: 2 }}>
-                      {place ? place.name : event.notes}
+          <div style={{ position: 'relative', paddingLeft: 60 }}>
+            {/* timeline line */}
+            <div style={{ position: 'absolute', left: 46, top: 18, bottom: 18, width: 1.5, background: C.border }}/>
+            {dayEvents.map((event, i) => {
+              const iconKind = iconTypeMap[event.icon_type] || 'sun'
+              const place = places.find(p => p.id === event.place_id)
+              return (
+                <div key={event.id} className="list-item" style={{ display: 'flex', gap: 0, marginBottom: 14, animationDelay: `${i * 0.05}s` }}>
+                  {/* time + dot */}
+                  <div style={{ position: 'absolute', left: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, width: 40 }}>
+                    <div style={{ fontFamily: C.sans, fontSize: 9, color: C.gold, fontWeight: 600, letterSpacing: '0.02em', lineHeight: 1 }}>
+                      {formatTime12(event.start_time).replace(' ', '\n')}
                     </div>
-                  )}
+                  </div>
+                  {/* dot on line */}
+                  <div style={{ position: 'absolute', left: 42, top: 10, width: 9, height: 9, borderRadius: '50%', background: C.primary, border: `2px solid ${C.bg}`, zIndex: 1 }}/>
+                  {/* content */}
+                  <div style={{
+                    flex: 1, background: C.card, borderRadius: 10,
+                    border: `1px solid ${C.border}`, padding: '10px 14px',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <EventIcon kind={iconKind}/>
+                      <div style={{ fontFamily: C.serif, fontSize: 15, color: C.primary, fontWeight: 600 }}>{event.title}</div>
+                    </div>
+                    {(place || event.notes) && (
+                      <div style={{ fontFamily: C.sans, fontSize: 10, color: C.inkMuted, marginTop: 4 }}>
+                        {place ? place.name : event.notes}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )
-          })
+              )
+            })}
+          </div>
         )}
       </div>
 

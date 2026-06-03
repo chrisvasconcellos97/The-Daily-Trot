@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format, differenceInDays, parseISO, addWeeks } from 'date-fns'
-import SimpleHeader from '../components/SimpleHeader'
+import ViewHeader, { IconBtn } from '../components/ViewHeader'
 import { useLibrary } from '../hooks/useLibrary'
 import C from '../colors'
 
@@ -158,7 +158,11 @@ export default function LibraryView({ familyId, toast }) {
 
   return (
     <div className="view-enter">
-      <SimpleHeader title="LIBRARY" />
+      <ViewHeader title="Library" subtitle="CHECKED OUT" trailing={
+        <IconBtn onClick={() => setShowAdd(true)}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+        </IconBtn>
+      }/>
 
       <div style={{ padding: '32px 16px 20px' }}>
 

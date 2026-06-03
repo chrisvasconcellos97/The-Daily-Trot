@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import SimpleHeader from '../components/SimpleHeader'
+import ViewHeader from '../components/ViewHeader'
 import Lillie from '../components/Lillie'
 import C from '../colors'
 
@@ -88,7 +88,7 @@ export default function ProfileView({ familyId, session, toast }) {
 
   return (
     <div className="view-enter">
-      <SimpleHeader title="PROFILE" />
+      <ViewHeader title="Profile" />
       <div style={{ padding: '32px 20px' }}>
         {/* Account email */}
         <div className="card" style={{ marginBottom: 12 }}>

@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
+import ViewHeader from '../components/ViewHeader'
 import { useGrocery } from '../hooks/useGrocery'
 import { useCleanScore } from '../hooks/useCleanScore'
 import C from '../colors'
@@ -26,7 +25,6 @@ function CategoryDot({ category }) {
 }
 
 export default function GroceryView({ familyId, toast }) {
-  const navigate = useNavigate()
   const { items, loading, addItem, toggleItem, deleteItem, clearChecked } = useGrocery(familyId)
   const { approvedSuggestions, fetchSuggestions } = useCleanScore(familyId)
   const [filter, setFilter] = useState('All')
@@ -88,24 +86,7 @@ export default function GroceryView({ familyId, toast }) {
 
   return (
     <div className="view-enter" style={{ paddingBottom: 120 }}>
-      <SimpleHeader
-        title="GROCERY LIST"
-        leading={
-          <IconBtn onClick={() => navigate(-1)} style={{ cursor: 'pointer' }}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </IconBtn>
-        }
-        trailing={
-          <IconBtn>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-              <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
-            </svg>
-          </IconBtn>
-        }
-      />
+      <ViewHeader title="Grocery" subtitle="SHOPPING LIST" />
 
       <div style={{ padding: '14px 18px 0' }}>
         <div style={{ display: 'flex', gap: 7, overflowX: 'auto', paddingBottom: 4 }}>
@@ -125,6 +106,26 @@ export default function GroceryView({ familyId, toast }) {
           ))}
         </div>
       </div>
+
+      {items.length > 0 && (
+        <div style={{ padding: '10px 18px 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+            <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, letterSpacing: '0.1em' }}>
+              {items.filter(i => i.checked).length} OF {items.length} DONE
+            </div>
+            <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, letterSpacing: '0.1em' }}>
+              {Math.round(items.filter(i => i.checked).length / items.length * 100)}%
+            </div>
+          </div>
+          <div style={{ height: 4, background: C.border, borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', background: C.primary, borderRadius: 2,
+              width: `${items.filter(i => i.checked).length / items.length * 100}%`,
+              transition: 'width 0.3s ease',
+            }}/>
+          </div>
+        </div>
+      )}
 
       <div style={{ padding: '14px 18px 0' }}>
         {unchecked.map((item, i) => (

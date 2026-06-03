@@ -1,40 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
+import ViewHeader, { IconBtn } from '../components/ViewHeader'
 import Modal from '../components/Modal'
 import { useChildren } from '../hooks/useChildren'
 import C from '../colors'
-
-function Divider({ width = 60 }) {
-  const mid = width / 2
-  return (
-    <svg width={width} height="12" viewBox={`0 0 ${width} 12`} style={{ display: 'block' }}>
-      <line x1="0" y1="6" x2={mid - 8} y2="6" stroke="#B5986A" strokeWidth="0.6"/>
-      <line x1={mid + 8} y1="6" x2={width} y2="6" stroke="#B5986A" strokeWidth="0.6"/>
-      <g transform={`translate(${mid}, 6) rotate(45)`}>
-        <rect x="-3" y="-3" width="6" height="6" fill="none" stroke="#B5986A" strokeWidth="0.7"/>
-      </g>
-    </svg>
-  )
-}
-
-function KidAvatar({ color, name }) {
-  const bg = color || '#E8C9A8'
-  // Colors matching design spec per name
-  const greenDeep = '#16301F'
-  const goldDark = '#8A7244'
-  return (
-    <svg viewBox="0 0 60 60" width="52" height="52" style={{ borderRadius: '50%', display: 'block' }}>
-      <rect width="60" height="60" fill={bg}/>
-      <circle cx="30" cy="26" r="11" fill="#F4DBC2"/>
-      <ellipse cx="30" cy="48" rx="18" ry="14" fill={C.primary}/>
-      <circle cx="26" cy="25" r="1.2" fill={greenDeep}/>
-      <circle cx="34" cy="25" r="1.2" fill={greenDeep}/>
-      <path d="M27 30 Q30 32 33 30" stroke={greenDeep} strokeWidth="1" fill="none" strokeLinecap="round"/>
-      <path d="M19 22 Q22 14 30 14 Q38 14 41 22" fill={goldDark} opacity="0.8"/>
-    </svg>
-  )
-}
 
 const COLOR_SWATCHES = [
   { label: 'Warm', value: '#E8C9A8' },
@@ -147,28 +116,11 @@ export default function KidsView({ familyId, toast }) {
 
   return (
     <div className="view-enter">
-      <SimpleHeader
-        title="MY KIDS"
-        leading={
-          <IconBtn>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </IconBtn>
-        }
-        trailing={
-          <IconBtn>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-          </IconBtn>
-        }
-      />
-
-      {/* Centered divider */}
-      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 16 }}>
-        <Divider width={60}/>
-      </div>
+      <ViewHeader title="My Kids" onBack={() => navigate(-1)} trailing={
+        <IconBtn onClick={openAdd}>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+        </IconBtn>
+      }/>
 
       <div style={{ padding: '14px 18px' }}>
         {children.length === 0 ? (
@@ -176,57 +128,56 @@ export default function KidsView({ familyId, toast }) {
             <p>No kids added yet — tap + to add one.</p>
           </div>
         ) : (
-          children.map((child, i) => (
-            <div
-              key={child.id}
-              className="list-item"
-              style={{
-                marginBottom: 14, display: 'flex', alignItems: 'center', gap: 14,
-                background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
-                padding: '12px 16px', cursor: 'pointer',
-                animationDelay: `${i * 0.05}s`,
-              }}
-              onClick={() => openEdit(child)}
-            >
-              <div style={{ width: 52, height: 52, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
-                <KidAvatar color={child.color} name={child.name}/>
+          children.map((child, i) => {
+            const accentColor = child.color || C.gold
+            return (
+              <div
+                key={child.id}
+                className="list-item"
+                style={{
+                  marginBottom: 12, cursor: 'pointer', animationDelay: `${i * 0.05}s`,
+                  background: C.card, borderRadius: 14, overflow: 'hidden',
+                  border: `1px solid ${C.border}`,
+                  display: 'flex', alignItems: 'stretch',
+                }}
+                onClick={() => openEdit(child)}
+              >
+                {/* left accent bar */}
+                <div style={{ width: 6, background: accentColor, flexShrink: 0 }}/>
+                {/* content */}
+                <div style={{ flex: 1, padding: '16px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                  {/* initial circle */}
+                  <div style={{
+                    width: 52, height: 52, borderRadius: '50%',
+                    background: accentColor, flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: C.serif, fontSize: 26, fontWeight: 700, color: '#fff',
+                  }}>
+                    {(child.name || '?').charAt(0).toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: C.serif, fontSize: 22, color: C.primary, fontWeight: 700, lineHeight: 1 }}>{child.name}</div>
+                    {child.birthdate && (
+                      <div style={{ fontFamily: C.sans, fontSize: 11, color: C.inkMuted, marginTop: 4 }}>{calcAge(child.birthdate)}</div>
+                    )}
+                    <button
+                      onClick={e => { e.stopPropagation(); navigate(`/kids/${child.id}/health`) }}
+                      style={{
+                        marginTop: 8, background: 'none', border: `1px solid ${C.gold}`,
+                        borderRadius: 12, padding: '4px 12px', cursor: 'pointer',
+                        display: 'inline-flex', alignItems: 'center', gap: 5,
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke={C.goldDark} strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                      <span style={{ fontFamily: C.sans, fontSize: 10, color: C.goldDark, fontWeight: 600, letterSpacing: '0.08em' }}>HEALTH</span>
+                    </button>
+                  </div>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke={C.border} strokeWidth="2"><path d="M9 6l6 6-6 6"/></svg>
+                </div>
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: C.serif, fontSize: 16, color: C.primary, fontWeight: 600 }}>{child.name}</div>
-                {child.birthdate && (
-                  <div style={{ fontFamily: C.sans, fontSize: 10, color: C.inkMuted, marginTop: 3 }}>{calcAge(child.birthdate)}</div>
-                )}
-                <button
-                  onClick={e => { e.stopPropagation(); navigate(`/kids/${child.id}/health`) }}
-                  style={{
-                    marginTop: 6, background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                    display: 'flex', alignItems: 'center', gap: 4,
-                  }}
-                >
-                  <span style={{ fontFamily: C.sans, fontSize: 10, color: C.gold, fontWeight: 600 }}>Health →</span>
-                </button>
-              </div>
-            </div>
-          ))
+            )
+          })
         )}
-
-        {/* Add Child row */}
-        <div
-          style={{
-            marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            padding: '14px 0', cursor: 'pointer',
-          }}
-          onClick={openAdd}
-        >
-          <div style={{
-            width: 22, height: 22, borderRadius: '50%',
-            border: `1.5px solid ${C.primary}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.primary,
-          }}>
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
-          </div>
-          <div style={{ fontFamily: C.serif, fontSize: 14, color: C.primary, fontWeight: 600 }}>Add Child</div>
-        </div>
       </div>
 
       {/* Add modal */}

@@ -6,88 +6,64 @@ import { useChildren } from '../hooks/useChildren'
 import { useGrocery } from '../hooks/useGrocery'
 import C from '../colors'
 
-function Divider({ width = 100 }) {
-  const mid = width / 2
+function DiamondDivider() {
   return (
-    <svg width={width} height="12" viewBox={`0 0 ${width} 12`} style={{ display: 'block' }}>
-      <line x1="0" y1="6" x2={mid - 8} y2="6" stroke="#B5986A" strokeWidth="0.6"/>
-      <line x1={mid + 8} y1="6" x2={width} y2="6" stroke="#B5986A" strokeWidth="0.6"/>
-      <g transform={`translate(${mid}, 6) rotate(45)`}>
-        <rect x="-3" y="-3" width="6" height="6" fill="none" stroke="#B5986A" strokeWidth="0.7"/>
-      </g>
+    <svg width="48" height="12" viewBox="0 0 48 12">
+      <line x1="0" y1="6" x2="16" y2="6" stroke={C.goldLight} strokeWidth="0.6"/>
+      <line x1="32" y1="6" x2="48" y2="6" stroke={C.goldLight} strokeWidth="0.6"/>
+      <g transform="translate(24,6) rotate(45)"><rect x="-3" y="-3" width="6" height="6" fill="none" stroke={C.goldLight} strokeWidth="0.8"/></g>
     </svg>
   )
 }
 
-function SectionHeader({ children }) {
+function formatTime12(t) {
+  if (!t) return ''
+  const [h, m] = t.split(':').map(Number)
+  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`
+}
+
+function SectionLabel({ children }) {
   return (
-    <div style={{ fontFamily: C.sans, fontSize: 9, letterSpacing: '0.18em', color: C.goldDark, fontWeight: 600, padding: '18px 18px 8px' }}>
+    <div style={{ fontFamily: C.sans, fontSize: 9, letterSpacing: '0.22em', color: C.goldDark, fontWeight: 600, padding: '22px 20px 10px' }}>
       {children}
     </div>
   )
 }
 
-function Chevron() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.goldDark} strokeWidth="1.8" style={{ flexShrink: 0 }}>
-      <path d="M9 6l6 6-6 6"/>
+const MORE_TILES = [
+  { label: 'SCHEDULE', route: '/schedule', icon: (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke={C.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>
     </svg>
-  )
-}
-
-function TileIcon({ kind }) {
-  const s = { fill: 'none', stroke: C.primary, strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' }
-  switch (kind) {
-    case 'cal': return (
-      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
-        <rect x="5" y="8" width="22" height="19" rx="2"/>
-        <path d="M5 13h22M11 5v5M21 5v5"/>
-        <rect x="9" y="16" width="3" height="3" fill={C.primary}/>
-      </svg>
-    )
-    case 'dish': return (
-      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
-        <path d="M5 22h22M7 22a9 9 0 0118 0"/>
-        <circle cx="16" cy="9" r="1.5" fill={C.primary}/>
-        <path d="M16 11v2"/>
-      </svg>
-    )
-    case 'people': return (
-      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
-        <circle cx="12" cy="11" r="4"/><circle cx="22" cy="13" r="3.2"/>
-        <path d="M4 26c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5M19 26c0-3 2.5-5 5-5s5 2 5 5"/>
-      </svg>
-    )
-    case 'bag': return (
-      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
-        <path d="M6 12h20l-2 14H8L6 12z"/>
-        <path d="M11 12V9a5 5 0 0110 0v3"/>
-        <path d="M11 16v2M21 16v2"/>
-      </svg>
-    )
-    case 'pin': return (
-      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
-        <path d="M16 28s9-8 9-15a9 9 0 10-18 0c0 7 9 15 9 15z"/>
-        <circle cx="16" cy="13" r="3" fill={C.primary}/>
-      </svg>
-    )
-    case 'book': return (
-      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
-        <path d="M5 7c3-1 7-1 11 2 4-3 8-3 11-2v18c-3-1-7-1-11 2-4-3-8-3-11-2V7z"/>
-        <path d="M16 9v18"/>
-      </svg>
-    )
-    default: return null
-  }
-}
-
-const tiles = [
-  { label: 'SCHEDULE',  icon: 'cal',    route: '/schedule' },
-  { label: 'MEALS',     icon: 'dish',   route: '/meals' },
-  { label: 'COMMUNITY', icon: 'people', route: '/community' },
-  { label: 'PACKING',   icon: 'bag',    route: '/packing' },
-  { label: 'PLACES',    icon: 'pin',    route: '/places' },
-  { label: 'LIBRARY',   icon: 'book',   route: '/library' },
+  )},
+  { label: 'MEALS', route: '/meals', icon: (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke={C.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 22V4M6 10c4 0 8-2 8-6M18 22V12M18 12c0-3-2-5-5-5"/>
+    </svg>
+  )},
+  { label: 'COMMUNITY', route: '/community', icon: (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke={C.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.5"/>
+      <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M13 20c.5-2.5 2-4 4-4s3.5 1.5 4 4"/>
+    </svg>
+  )},
+  { label: 'PACKING', route: '/packing', icon: (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke={C.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 9h14l-1.5 11H6.5L5 9z"/><path d="M9 9V7a3 3 0 016 0v2"/>
+    </svg>
+  )},
+  { label: 'PLACES', route: '/places', icon: (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke={C.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 21s-8-6.9-8-12a8 8 0 1116 0c0 5.1-8 12-8 12z"/>
+      <circle cx="12" cy="9" r="2.5" fill={C.primary}/>
+    </svg>
+  )},
+  { label: 'LIBRARY', route: '/library', icon: (
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke={C.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 5c2-.5 5-.5 8 1 3-1.5 6-1.5 8-1v14c-2-.5-5-.5-8 1-3-1.5-6-1.5-8-1V5z"/>
+      <path d="M12 6v14"/>
+    </svg>
+  )},
 ]
 
 function getGreeting() {
@@ -95,12 +71,6 @@ function getGreeting() {
   if (h < 12) return 'Good morning'
   if (h < 17) return 'Good afternoon'
   return 'Good evening'
-}
-
-function formatTime12(t) {
-  if (!t) return ''
-  const [h, m] = t.split(':').map(Number)
-  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`
 }
 
 export default function HomeView({ familyId, session }) {
@@ -113,145 +83,158 @@ export default function HomeView({ familyId, session }) {
   const firstName = rawName.split(/[._]/)[0].charAt(0).toUpperCase() + rawName.split(/[._]/)[0].slice(1)
 
   const todayStr = format(new Date(), 'yyyy-MM-dd')
+  const dayOfWeek = format(new Date(), 'EEEE').toUpperCase()
+  const monthDay = format(new Date(), 'MMMM d')
   const todayEvents = events
     .filter(e => e.date === todayStr)
     .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
-  const nextEvent = todayEvents[0]
   const groceryCount = items.filter(i => !i.checked).length
 
   return (
     <div className="view-enter">
-      <div style={{ paddingTop: 52, paddingBottom: 4, textAlign: 'center' }}>
-        <div style={{ fontFamily: C.serif, fontSize: 11, letterSpacing: '0.32em', color: C.primary, opacity: 0.7 }}>THE</div>
-        <div style={{ fontFamily: C.serif, fontSize: 22, letterSpacing: '0.18em', color: C.primary, fontWeight: 700 }}>DAILY TROT</div>
-      </div>
-
-      {/* Greeting */}
-      <div style={{ paddingTop: 20, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{ fontFamily: C.serif, fontSize: 21, color: C.ink, fontWeight: 600, textAlign: 'center' }}>
-          {getGreeting()}, {firstName}.
-        </div>
-        <div style={{ marginTop: 6 }}><Divider width={50}/></div>
-      </div>
-
-      {/* TODAY */}
-      <SectionHeader>TODAY</SectionHeader>
-      <div
-        className="card"
-        style={{ margin: '0 18px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
-        onClick={() => navigate('/today')}
-      >
-        <div style={{
-          width: 40, height: 40, borderRadius: '50%', background: C.bgLight,
-          border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>
-          <TileIcon kind="cal"/>
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: C.serif, fontSize: 15, color: C.ink, fontWeight: 600 }}>
-            {todayEvents.length > 0 ? `${todayEvents.length} ${todayEvents.length === 1 ? 'event' : 'events'} today` : 'Nothing scheduled'}
+      {/* ── HERO ── dark green panel */}
+      <div style={{
+        background: C.primary, paddingTop: 58, paddingBottom: 28,
+        paddingLeft: 22, paddingRight: 22, flexShrink: 0,
+      }}>
+        {/* wordmark */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div>
+            <div style={{ fontFamily: C.sans, fontSize: 8.5, letterSpacing: '0.32em', color: C.goldLight, fontWeight: 600, opacity: 0.8 }}>THE</div>
+            <div style={{ fontFamily: C.serif, fontSize: 20, letterSpacing: '0.2em', color: C.goldLight, fontWeight: 700, lineHeight: 1 }}>DAILY TROT</div>
           </div>
-          {nextEvent && (
-            <div style={{ fontFamily: C.sans, fontSize: 11, color: C.inkMuted, marginTop: 2 }}>
-              {nextEvent.title}{nextEvent.start_time ? ` · ${formatTime12(nextEvent.start_time)}` : ''}
-            </div>
-          )}
+          <button onClick={() => navigate('/profile')} style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.7, padding: 4 }}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke={C.bgLight} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>
+            </svg>
+          </button>
         </div>
-        <Chevron/>
-      </div>
 
-      {/* GROCERY */}
-      <SectionHeader>GROCERY</SectionHeader>
-      <div
-        className="card"
-        style={{ margin: '0 18px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
-        onClick={() => navigate('/grocery')}
-      >
-        <div style={{
-          width: 40, height: 40, borderRadius: '50%', background: C.bgLight,
-          border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke={C.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 4h2l2 12h11l2-8H6"/><circle cx="9" cy="20" r="1.3" fill={C.primary}/><circle cx="17" cy="20" r="1.3" fill={C.primary}/>
-          </svg>
+        {/* date + greeting */}
+        <div style={{ marginBottom: 6 }}>
+          <div style={{ fontFamily: C.serif, fontSize: 42, fontWeight: 700, color: '#F6F0DE', lineHeight: 1, letterSpacing: '0.02em' }}>{dayOfWeek}</div>
+          <div style={{ fontFamily: C.serif, fontSize: 16, color: C.goldLight, marginTop: 3, fontStyle: 'italic' }}>{monthDay} · {getGreeting()}, {firstName}.</div>
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: C.serif, fontSize: 15, color: C.ink, fontWeight: 600 }}>
-            {groceryCount > 0 ? `${groceryCount} ${groceryCount === 1 ? 'item' : 'items'} to get` : 'List is empty'}
-          </div>
-        </div>
-        <Chevron/>
-      </div>
 
-      {/* KIDS */}
-      <SectionHeader>KIDS</SectionHeader>
-      <div
-        style={{ padding: '0 18px', display: 'flex', gap: 12, overflowX: 'auto', cursor: 'pointer' }}
-        onClick={() => navigate('/kids')}
-      >
-        {children.length === 0 ? (
+        <div style={{ marginTop: 14 }}><DiamondDivider/></div>
+
+        {/* summary chips */}
+        <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
           <button
-            onClick={(e) => { e.stopPropagation(); navigate('/kids') }}
+            onClick={() => navigate('/today')}
             style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-              background: 'none', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(246,240,222,0.12)', border: '1px solid rgba(212,188,138,0.3)',
+              borderRadius: 20, padding: '7px 14px', cursor: 'pointer',
             }}
           >
-            <div style={{
-              width: 52, height: 52, borderRadius: '50%',
-              border: `1.5px dashed ${C.inkMuted}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: C.inkMuted,
-            }}>
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
-            </div>
-            <div style={{ fontFamily: C.sans, fontSize: 10, color: C.inkMuted, fontWeight: 600 }}>Add</div>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke={C.goldLight} strokeWidth="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>
+            <span style={{ fontFamily: C.sans, fontSize: 11, color: '#F6F0DE', fontWeight: 500 }}>
+              {todayEvents.length > 0 ? `${todayEvents.length} event${todayEvents.length > 1 ? 's' : ''} today` : 'Free day'}
+            </span>
           </button>
-        ) : (
-          children.map(child => {
-            const initial = (child.name || '?').charAt(0).toUpperCase()
-            return (
-              <div key={child.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                <div style={{
-                  width: 52, height: 52, borderRadius: '50%',
-                  background: child.color || C.gold,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  fontFamily: C.serif, fontSize: 22, fontWeight: 700, color: C.white,
-                }}>
-                  {initial}
-                </div>
-                <div style={{ fontFamily: C.sans, fontSize: 10, color: C.ink, fontWeight: 500, maxWidth: 60, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {child.name}
-                </div>
-              </div>
-            )
-          })
-        )}
+          <button
+            onClick={() => navigate('/grocery')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(246,240,222,0.12)', border: '1px solid rgba(212,188,138,0.3)',
+              borderRadius: 20, padding: '7px 14px', cursor: 'pointer',
+            }}
+          >
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke={C.goldLight} strokeWidth="1.8"><path d="M3 4h2l2 12h11l2-8H6"/><circle cx="9" cy="20" r="1.3" fill={C.goldLight}/><circle cx="17" cy="20" r="1.3" fill={C.goldLight}/></svg>
+            <span style={{ fontFamily: C.sans, fontSize: 11, color: '#F6F0DE', fontWeight: 500 }}>
+              {groceryCount > 0 ? `${groceryCount} to get` : 'List clear'}
+            </span>
+          </button>
+        </div>
       </div>
 
-      {/* MORE */}
-      <SectionHeader>MORE</SectionHeader>
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10,
-        padding: '0 18px 8px',
-      }}>
-        {tiles.map((tile, i) => (
+      {/* ── TODAY PREVIEW ── */}
+      {todayEvents.length > 0 && (
+        <>
+          <SectionLabel>UP NEXT</SectionLabel>
+          <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {todayEvents.slice(0, 3).map((event, i) => (
+              <div
+                key={event.id}
+                className="list-item"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 16px', background: C.card,
+                  borderRadius: i === 0 ? '12px 12px 0 0' : i === Math.min(todayEvents.length, 3) - 1 ? '0 0 12px 12px' : '0',
+                  borderBottom: i < Math.min(todayEvents.length, 3) - 1 ? `1px solid ${C.border}` : 'none',
+                  border: `1px solid ${C.border}`,
+                  borderTop: i > 0 ? 'none' : undefined,
+                  cursor: 'pointer', animationDelay: `${i * 0.05}s`,
+                }}
+                onClick={() => navigate('/today')}
+              >
+                <div style={{
+                  fontFamily: C.sans, fontSize: 10, color: C.gold, fontWeight: 600,
+                  width: 46, textAlign: 'right', flexShrink: 0, letterSpacing: '0.02em',
+                }}>{formatTime12(event.start_time)}</div>
+                <div style={{ width: 1.5, height: 28, background: C.border, flexShrink: 0 }}/>
+                <div style={{ fontFamily: C.serif, fontSize: 15, color: C.ink, fontWeight: 600 }}>{event.title}</div>
+              </div>
+            ))}
+            {todayEvents.length > 3 && (
+              <button
+                onClick={() => navigate('/today')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '10px 16px', textAlign: 'left', fontFamily: C.sans, fontSize: 11, color: C.gold, fontWeight: 600, letterSpacing: '0.08em' }}
+              >
+                +{todayEvents.length - 3} MORE →
+              </button>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ── KIDS ── */}
+      {children.length > 0 && (
+        <>
+          <SectionLabel>KIDS</SectionLabel>
+          <div style={{ padding: '0 20px', display: 'flex', gap: 14, overflowX: 'auto' }}>
+            {children.map(child => {
+              const initial = (child.name || '?').charAt(0).toUpperCase()
+              return (
+                <button
+                  key={child.id}
+                  onClick={() => navigate('/kids')}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+                >
+                  <div style={{
+                    width: 54, height: 54, borderRadius: '50%',
+                    background: child.color || C.gold,
+                    border: `3px solid ${C.bg}`,
+                    boxShadow: `0 0 0 1.5px ${C.border}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: C.serif, fontSize: 24, fontWeight: 700, color: '#fff',
+                  }}>{initial}</div>
+                  <div style={{ fontFamily: C.sans, fontSize: 10, color: C.inkMuted, fontWeight: 500, letterSpacing: '0.04em' }}>{child.name.split(' ')[0].toUpperCase()}</div>
+                </button>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {/* ── MORE ── */}
+      <SectionLabel>MORE</SectionLabel>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, padding: '0 20px 20px' }}>
+        {MORE_TILES.map((tile, i) => (
           <button
             key={tile.label}
             className="list-item"
             style={{
-              aspectRatio: '1 / 1.1',
-              background: C.card, border: `1px solid ${C.border}`, borderRadius: 10,
+              aspectRatio: '1 / 1.05',
+              background: C.card, border: `1px solid ${C.border}`, borderRadius: 14,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              gap: 6, padding: '8px 4px',
-              cursor: 'pointer', animationDelay: `${i * 0.04}s`,
+              gap: 8, padding: '10px 4px', cursor: 'pointer', animationDelay: `${i * 0.04}s`,
             }}
             onClick={() => navigate(tile.route)}
           >
-            <TileIcon kind={tile.icon}/>
-            <div style={{
-              fontFamily: C.sans, fontSize: 8, letterSpacing: '0.16em',
-              color: C.primary, fontWeight: 600,
-            }}>{tile.label}</div>
+            {tile.icon}
+            <div style={{ fontFamily: C.sans, fontSize: 8, letterSpacing: '0.16em', color: C.primary, fontWeight: 600 }}>{tile.label}</div>
           </button>
         ))}
       </div>

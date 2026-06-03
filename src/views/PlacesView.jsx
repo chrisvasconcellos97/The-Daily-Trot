@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
+import ViewHeader from '../components/ViewHeader'
 import Modal from '../components/Modal'
 import { usePlaces } from '../hooks/usePlaces'
 import C from '../colors'
@@ -134,23 +134,7 @@ export default function PlacesView({ familyId, toast }) {
 
   return (
     <div className="view-enter">
-      <SimpleHeader
-        title="MY PLACES"
-        leading={
-          <IconBtn>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </IconBtn>
-        }
-        trailing={
-          <IconBtn>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 5v14M5 12h14"/>
-            </svg>
-          </IconBtn>
-        }
-      />
+      <ViewHeader title="My Places" subtitle="SAVED SPOTS" />
 
       {/* Search bar */}
       <div style={{
