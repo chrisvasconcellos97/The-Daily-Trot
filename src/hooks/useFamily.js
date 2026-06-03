@@ -33,18 +33,22 @@ export function useFamily(userId) {
         const email = userSession?.user?.email || 'My Family'
         const familyName = email.split('@')[0]
 
-        const { data: newFamily, error: familyError } = await supabase
+        // Generate ID client-side to avoid RLS chicken-and-egg:
+        // INSERT into families succeeds, but the .select() after it would be
+        // blocked because the SELECT policy checks family_members which doesn't
+        // exist yet.
+        const newFamilyId = crypto.randomUUID()
+
+        const { error: familyError } = await supabase
           .from('families')
-          .insert({ name: familyName })
-          .select()
-          .single()
+          .insert({ id: newFamilyId, name: familyName })
 
         if (familyError) throw familyError
 
         const { error: memberInsertError } = await supabase
           .from('family_members')
           .insert({
-            family_id: newFamily.id,
+            family_id: newFamilyId,
             user_id: userId,
             display_name: familyName,
             role: 'admin'
@@ -52,7 +56,7 @@ export function useFamily(userId) {
 
         if (memberInsertError) throw memberInsertError
 
-        setFamilyId(newFamily.id)
+        setFamilyId(newFamilyId)
       } catch (err) {
         setError(err.message)
       } finally {
