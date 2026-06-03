@@ -169,8 +169,8 @@ export default function LibraryView({ familyId, toast }) {
           <div className="empty-state">
             <div style={{ fontSize: 40, marginBottom: 12 }}>📚</div>
             <div style={{
-              fontFamily: 'Playfair Display, serif',
-              fontSize: 18, fontWeight: 700, color: C.textDark, marginBottom: 8,
+              fontFamily: C.serif,
+              fontSize: 18, fontWeight: 700, color: C.ink, marginBottom: 8,
             }}>
               No books checked out
             </div>
@@ -188,8 +188,8 @@ export default function LibraryView({ familyId, toast }) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
                     <div style={{ flex: 1 }}>
                       <div style={{
-                        fontFamily: 'Playfair Display, serif',
-                        fontSize: 16, fontWeight: 700, color: C.textDark, lineHeight: 1.3,
+                        fontFamily: C.serif,
+                        fontSize: 16, fontWeight: 700, color: C.ink, lineHeight: 1.3,
                       }}>
                         {book.title}
                       </div>
@@ -250,7 +250,7 @@ export default function LibraryView({ familyId, toast }) {
         {/* Returned books */}
         {returned.length > 0 && (
           <div style={{ marginTop: 32 }}>
-            <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 16, fontWeight: 700, color: C.textDark }}>
+            <div style={{ fontFamily: C.serif, fontSize: 16, fontWeight: 700, color: C.ink }}>
               Returned
             </div>
             <div className="section-accent" />
@@ -262,7 +262,7 @@ export default function LibraryView({ familyId, toast }) {
                   background: C.primaryFaint, opacity: 0.75,
                 }}>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: C.textDark }}>{book.title}</div>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: C.ink }}>{book.title}</div>
                     {book.author && (
                       <div style={{ fontSize: 12, color: 'rgba(44,24,16,0.45)' }}>{book.author}</div>
                     )}

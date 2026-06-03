@@ -3,6 +3,7 @@ import { format } from 'date-fns'
 import Lillie from '../components/Lillie'
 import { useSchedule } from '../hooks/useSchedule'
 import { useChildren } from '../hooks/useChildren'
+import { useGrocery } from '../hooks/useGrocery'
 import C from '../colors'
 
 function Divider({ width = 100 }) {
@@ -18,91 +19,62 @@ function Divider({ width = 100 }) {
   )
 }
 
+function SectionHeader({ children }) {
+  return (
+    <div style={{ fontFamily: C.sans, fontSize: 9, letterSpacing: '0.18em', color: C.goldDark, fontWeight: 600, padding: '18px 18px 8px' }}>
+      {children}
+    </div>
+  )
+}
+
+function Chevron() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.goldDark} strokeWidth="1.8" style={{ flexShrink: 0 }}>
+      <path d="M9 6l6 6-6 6"/>
+    </svg>
+  )
+}
+
 function TileIcon({ kind }) {
   const s = { fill: 'none', stroke: C.primary, strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round' }
   switch (kind) {
     case 'cal': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
+      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
         <rect x="5" y="8" width="22" height="19" rx="2"/>
         <path d="M5 13h22M11 5v5M21 5v5"/>
         <rect x="9" y="16" width="3" height="3" fill={C.primary}/>
       </svg>
     )
     case 'dish': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
+      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
         <path d="M5 22h22M7 22a9 9 0 0118 0"/>
         <circle cx="16" cy="9" r="1.5" fill={C.primary}/>
         <path d="M16 11v2"/>
       </svg>
     )
-    case 'abc': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
-        <rect x="4" y="11" width="11" height="11" rx="1.5"/>
-        <rect x="17" y="11" width="11" height="11" rx="1.5"/>
-        <rect x="10" y="2" width="11" height="11" rx="1.5" transform="rotate(8 16 7)"/>
-        <text x="9.5" y="20" fontSize="7" fontFamily="serif" fill={C.primary} stroke="none" fontWeight="600">A</text>
-        <text x="22" y="20" fontSize="7" fontFamily="serif" fill={C.primary} stroke="none" fontWeight="600">C</text>
-      </svg>
-    )
-    case 'clip': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
-        <rect x="7" y="6" width="18" height="22" rx="2"/>
-        <rect x="12" y="3" width="8" height="5" rx="1.2" fill={C.bg}/>
-        <path d="M11 14h10M11 18h10M11 22h6"/>
+    case 'people': return (
+      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
+        <circle cx="12" cy="11" r="4"/><circle cx="22" cy="13" r="3.2"/>
+        <path d="M4 26c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5M19 26c0-3 2.5-5 5-5s5 2 5 5"/>
       </svg>
     )
     case 'bag': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
+      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
         <path d="M6 12h20l-2 14H8L6 12z"/>
         <path d="M11 12V9a5 5 0 0110 0v3"/>
         <path d="M11 16v2M21 16v2"/>
       </svg>
     )
     case 'pin': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
-        <circle cx="16" cy="14" r="9"/>
-        <circle cx="16" cy="14" r="3" fill={C.primary}/>
-      </svg>
-    )
-    case 'clock': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
-        <circle cx="16" cy="16" r="11"/>
-        <path d="M16 9v7l5 3"/>
+      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
+        <path d="M16 28s9-8 9-15a9 9 0 10-18 0c0 7 9 15 9 15z"/>
+        <circle cx="16" cy="13" r="3" fill={C.primary}/>
       </svg>
     )
     case 'book': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
+      <svg viewBox="0 0 32 32" width="28" height="28" {...s}>
         <path d="M5 7c3-1 7-1 11 2 4-3 8-3 11-2v18c-3-1-7-1-11 2-4-3-8-3-11-2V7z"/>
         <path d="M16 9v18"/>
-      </svg>
-    )
-    case 'note': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
-        <rect x="7" y="5" width="18" height="22" rx="2"/>
-        <path d="M11 11h10M11 15h10M11 19h7"/>
-        <path d="M21 22l3 3 4-5" stroke={C.gold}/>
-      </svg>
-    )
-    case 'cart': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
-        <path d="M4 6h3l3 14h14l3-10H9"/>
-        <circle cx="12" cy="24" r="1.8" fill={C.primary}/>
-        <circle cx="22" cy="24" r="1.8" fill={C.primary}/>
-      </svg>
-    )
-    case 'star': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
-        <path d="M16 4l3 8h9l-7 5 3 8-8-5-8 5 3-8-7-5h9z"/>
-      </svg>
-    )
-    case 'scan': return (
-      <svg viewBox="0 0 32 32" width="32" height="32" {...s}>
-        <rect x="4" y="4" width="8" height="8" rx="1"/>
-        <rect x="20" y="4" width="8" height="8" rx="1"/>
-        <rect x="4" y="20" width="8" height="8" rx="1"/>
-        <path d="M20 20h2M24 20h4M20 24v4M24 24h4M24 28h4"/>
-        <line x1="14" y1="4" x2="14" y2="28" strokeWidth="1"/>
-        <line x1="17" y1="4" x2="17" y2="28" strokeWidth="2"/>
       </svg>
     )
     default: return null
@@ -110,15 +82,12 @@ function TileIcon({ kind }) {
 }
 
 const tiles = [
-  { label: 'SCHEDULE',      icon: 'cal',   route: '/schedule' },
-  { label: 'MEALS',         icon: 'dish',  route: '/meals' },
-  { label: 'ACTIVITIES',    icon: 'abc',   route: null },
-  { label: 'TASKS',         icon: 'clip',  route: null },
-  { label: 'PACKING LISTS', icon: 'bag',   route: '/packing' },
-  { label: 'MY PLACES',     icon: 'pin',   route: '/places' },
-  { label: 'ROUTINES',      icon: 'clock', route: null },
-  { label: 'RESOURCES',     icon: 'book',  route: null },
-  { label: 'NOTES',         icon: 'note',  route: null },
+  { label: 'SCHEDULE',  icon: 'cal',    route: '/schedule' },
+  { label: 'MEALS',     icon: 'dish',   route: '/meals' },
+  { label: 'COMMUNITY', icon: 'people', route: '/community' },
+  { label: 'PACKING',   icon: 'bag',    route: '/packing' },
+  { label: 'PLACES',    icon: 'pin',    route: '/places' },
+  { label: 'LIBRARY',   icon: 'book',   route: '/library' },
 ]
 
 function getGreeting() {
@@ -134,17 +103,21 @@ function formatTime12(t) {
   return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`
 }
 
-export default function HomeView({ familyId, session, toast }) {
+export default function HomeView({ familyId, session }) {
   const navigate = useNavigate()
   const { events } = useSchedule(familyId)
   const { children } = useChildren(familyId)
+  const { items } = useGrocery(familyId)
 
   const rawName = session?.user?.email?.split('@')[0] || 'there'
   const firstName = rawName.split(/[._]/)[0].charAt(0).toUpperCase() + rawName.split(/[._]/)[0].slice(1)
 
   const todayStr = format(new Date(), 'yyyy-MM-dd')
-  const todayEvents = events.filter(e => e.date === todayStr)
-  const firstEvent = todayEvents[0]
+  const todayEvents = events
+    .filter(e => e.date === todayStr)
+    .sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
+  const nextEvent = todayEvents[0]
+  const groceryCount = items.filter(i => !i.checked).length
 
   return (
     <div className="view-enter">
@@ -155,31 +128,124 @@ export default function HomeView({ familyId, session, toast }) {
 
       {/* Greeting */}
       <div style={{ paddingTop: 20, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <div style={{
-          fontFamily: C.serif, fontSize: 21, color: C.ink, fontWeight: 600, textAlign: 'center',
-        }}>
+        <div style={{ fontFamily: C.serif, fontSize: 21, color: C.ink, fontWeight: 600, textAlign: 'center' }}>
           {getGreeting()}, {firstName}.
         </div>
         <div style={{ marginTop: 6 }}><Divider width={50}/></div>
       </div>
 
-      {/* 3×3 tile grid */}
+      {/* TODAY */}
+      <SectionHeader>TODAY</SectionHeader>
+      <div
+        className="card"
+        style={{ margin: '0 18px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+        onClick={() => navigate('/today')}
+      >
+        <div style={{
+          width: 40, height: 40, borderRadius: '50%', background: C.bgLight,
+          border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <TileIcon kind="cal"/>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: C.serif, fontSize: 15, color: C.ink, fontWeight: 600 }}>
+            {todayEvents.length > 0 ? `${todayEvents.length} ${todayEvents.length === 1 ? 'event' : 'events'} today` : 'Nothing scheduled'}
+          </div>
+          {nextEvent && (
+            <div style={{ fontFamily: C.sans, fontSize: 11, color: C.inkMuted, marginTop: 2 }}>
+              {nextEvent.title}{nextEvent.start_time ? ` · ${formatTime12(nextEvent.start_time)}` : ''}
+            </div>
+          )}
+        </div>
+        <Chevron/>
+      </div>
+
+      {/* GROCERY */}
+      <SectionHeader>GROCERY</SectionHeader>
+      <div
+        className="card"
+        style={{ margin: '0 18px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+        onClick={() => navigate('/grocery')}
+      >
+        <div style={{
+          width: 40, height: 40, borderRadius: '50%', background: C.bgLight,
+          border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        }}>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke={C.primary} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 4h2l2 12h11l2-8H6"/><circle cx="9" cy="20" r="1.3" fill={C.primary}/><circle cx="17" cy="20" r="1.3" fill={C.primary}/>
+          </svg>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: C.serif, fontSize: 15, color: C.ink, fontWeight: 600 }}>
+            {groceryCount > 0 ? `${groceryCount} ${groceryCount === 1 ? 'item' : 'items'} to get` : 'List is empty'}
+          </div>
+        </div>
+        <Chevron/>
+      </div>
+
+      {/* KIDS */}
+      <SectionHeader>KIDS</SectionHeader>
+      <div
+        style={{ padding: '0 18px', display: 'flex', gap: 12, overflowX: 'auto', cursor: 'pointer' }}
+        onClick={() => navigate('/kids')}
+      >
+        {children.length === 0 ? (
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate('/kids') }}
+            style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+              background: 'none', border: 'none', cursor: 'pointer',
+            }}
+          >
+            <div style={{
+              width: 52, height: 52, borderRadius: '50%',
+              border: `1.5px dashed ${C.inkMuted}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: C.inkMuted,
+            }}>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
+            </div>
+            <div style={{ fontFamily: C.sans, fontSize: 10, color: C.inkMuted, fontWeight: 600 }}>Add</div>
+          </button>
+        ) : (
+          children.map(child => {
+            const initial = (child.name || '?').charAt(0).toUpperCase()
+            return (
+              <div key={child.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                <div style={{
+                  width: 52, height: 52, borderRadius: '50%',
+                  background: child.color || C.gold,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  fontFamily: C.serif, fontSize: 22, fontWeight: 700, color: C.white,
+                }}>
+                  {initial}
+                </div>
+                <div style={{ fontFamily: C.sans, fontSize: 10, color: C.ink, fontWeight: 500, maxWidth: 60, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {child.name}
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+
+      {/* MORE */}
+      <SectionHeader>MORE</SectionHeader>
       <div style={{
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10,
-        padding: '16px 18px 0',
+        padding: '0 18px 8px',
       }}>
         {tiles.map((tile, i) => (
           <button
             key={tile.label}
             className="list-item"
             style={{
-              aspectRatio: '1 / 1.04',
+              aspectRatio: '1 / 1.1',
               background: C.card, border: `1px solid ${C.border}`, borderRadius: 10,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               gap: 6, padding: '8px 4px',
               cursor: 'pointer', animationDelay: `${i * 0.04}s`,
             }}
-            onClick={() => tile.route ? navigate(tile.route) : toast('Coming soon!', 'success')}
+            onClick={() => navigate(tile.route)}
           >
             <TileIcon kind={tile.icon}/>
             <div style={{
@@ -188,42 +254,6 @@ export default function HomeView({ familyId, session, toast }) {
             }}>{tile.label}</div>
           </button>
         ))}
-      </div>
-
-      {/* Lillie's Reminder card */}
-      <div
-        style={{
-          margin: '12px 18px 0',
-          background: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
-          padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10,
-          cursor: 'pointer',
-        }}
-        onClick={() => navigate('/today')}
-      >
-        <div style={{
-          width: 38, height: 38, borderRadius: '50%',
-          background: C.bgLight, border: `1px solid ${C.border}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-        }}>
-          <Lillie size={26} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{
-            fontFamily: C.sans, fontSize: 9, letterSpacing: '0.18em',
-            color: C.goldDark, fontWeight: 600,
-          }}>LILLIE'S REMINDER</div>
-          <div style={{
-            fontFamily: C.serif, fontSize: 12, color: C.ink, marginTop: 3, lineHeight: 1.3,
-          }}>
-            {firstEvent
-              ? `${firstEvent.title}${firstEvent.start_time ? ' — ' + formatTime12(firstEvent.start_time) : ''}`
-              : 'Your day is clear — enjoy it!'}
-          </div>
-        </div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.goldDark} strokeWidth="1.8">
-          <path d="M9 6l6 6-6 6"/>
-        </svg>
       </div>
     </div>
   )

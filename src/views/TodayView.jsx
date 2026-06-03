@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { format, addDays, subDays } from 'date-fns'
 import SimpleHeader, { IconBtn } from '../components/SimpleHeader'
 import Modal from '../components/Modal'
+import Lillie from '../components/Lillie'
 import { useSchedule } from '../hooks/useSchedule'
 import { usePlaces } from '../hooks/usePlaces'
 import C from '../colors'
@@ -32,18 +33,6 @@ const iconTypeMap = {
   'activity': 'sun',
   'default': 'sun',
 }
-
-// Sample events from design spec (shown when DB is empty)
-const SAMPLE_EVENTS = [
-  { id: 's1', time: '7:00 AM', title: 'Morning Routine', sub: 'Breakfast, vitamins + more', icon: 'sun' },
-  { id: 's2', time: '8:15 AM', title: 'School Drop Off', sub: '', icon: 'car' },
-  { id: 's3', time: '10:00 AM', title: 'Library Storytime', sub: 'Main Street Library', icon: 'book' },
-  { id: 's4', time: '12:00 PM', title: 'Lunch with Harper', sub: 'The Meadow Café', icon: 'cup' },
-  { id: 's5', time: '2:30 PM', title: 'Swim Class', sub: 'AquaKids', icon: 'wave' },
-  { id: 's6', time: '4:00 PM', title: 'Grocery Pickup', sub: 'Wegmans', icon: 'cart' },
-  { id: 's7', time: '6:30 PM', title: 'Family Dinner', sub: 'Chicken tacos', icon: 'fork' },
-  { id: 's8', time: '8:30 PM', title: 'Bedtime Routine', sub: 'Stories & snuggles', icon: 'moon' },
-]
 
 function formatTime12(timeStr) {
   if (!timeStr) return ''
@@ -143,29 +132,11 @@ export default function TodayView({ familyId, toast }) {
       {/* Event list */}
       <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 9 }}>
         {dayEvents.length === 0 ? (
-          SAMPLE_EVENTS.map((e) => {
-            const place = places.find(p => p.id === e.place_id)
-            return (
-              <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{
-                  fontFamily: C.sans, fontSize: 9.5, color: C.primary, fontWeight: 500,
-                  width: 50, textAlign: 'right', flexShrink: 0,
-                }}>{e.time}</div>
-                <div style={{
-                  width: 30, height: 30, borderRadius: '50%',
-                  background: C.card, border: `1px solid ${C.border}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  <EventIcon kind={e.icon}/>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: C.serif, fontSize: 13, color: C.primary, fontWeight: 600, lineHeight: 1.1 }}>{e.title}</div>
-                  {e.sub && <div style={{ fontFamily: C.sans, fontSize: 9, color: C.inkMuted, marginTop: 2 }}>{e.sub}</div>}
-                </div>
-              </div>
-            )
-          })
+          <div style={{ textAlign: 'center', padding: '48px 0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            <Lillie size={44} />
+            <div style={{ fontFamily: C.serif, fontSize: 15, color: C.ink, opacity: 0.55 }}>Nothing scheduled — enjoy the quiet!</div>
+            <div style={{ fontFamily: C.sans, fontSize: 11, color: C.inkMuted }}>Tap + to add an event</div>
+          </div>
         ) : (
           dayEvents.map((event, i) => {
             const iconKind = iconTypeMap[event.icon_type] || 'sun'

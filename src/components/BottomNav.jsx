@@ -28,8 +28,8 @@ export default function BottomNav({ onLillie }) {
   const location = useLocation()
   const active = location.pathname === '/' ? 'home'
     : location.pathname === '/today' ? 'today'
-    : location.pathname === '/community' ? 'community'
-    : location.pathname === '/profile' ? 'profile' : ''
+    : location.pathname === '/grocery' ? 'grocery'
+    : location.pathname === '/kids' ? 'kids' : ''
 
   return (
     <nav className="bottom-nav" role="navigation" aria-label="Main navigation">
@@ -60,14 +60,14 @@ export default function BottomNav({ onLillie }) {
           <Lillie size={38} shield />
         </button>
       </div>
-      <Item id="community" label="COMMUNITY" active={active} onClick={() => navigate('/community')} icon={
+      <Item id="grocery" label="GROCERY" active={active} onClick={() => navigate('/grocery')} icon={
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{width:'100%',height:'100%'}}>
-          <circle cx="9" cy="9" r="3"/><circle cx="17" cy="11" r="2.5"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M14 20c0-2 2-4 4-4s4 2 4 4"/>
+          <path d="M3 4h2l2 12h11l2-8H6"/><circle cx="9" cy="20" r="1.3" fill="currentColor"/><circle cx="17" cy="20" r="1.3" fill="currentColor"/>
         </svg>
       }/>
-      <Item id="profile" label="PROFILE" active={active} onClick={() => navigate('/profile')} icon={
+      <Item id="kids" label="KIDS" active={active} onClick={() => navigate('/kids')} icon={
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{width:'100%',height:'100%'}}>
-          <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/>
+          <circle cx="8" cy="8" r="3"/><circle cx="16" cy="9" r="2.5"/><path d="M3 20c0-3 2-5 5-5s5 2 5 5M13 20c0-2.5 1.5-4 3-4s3 1.5 3 4"/>
         </svg>
       }/>
     </nav>
