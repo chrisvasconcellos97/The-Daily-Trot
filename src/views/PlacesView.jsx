@@ -39,6 +39,9 @@ function CatIcon({ kind }) {
     case 'art': return <svg viewBox="0 0 24 24" width="20" height="20" {...s}><path d="M12 4c-5 0-9 3-9 8 0 3 2 5 5 5 1 0 1-1 1-2s1-2 2-2c3 0 6-2 6-5s-2-4-5-4z"/><circle cx="7" cy="9" r="1" fill={C.primary}/><circle cx="11" cy="6" r="1" fill={C.primary}/><circle cx="16" cy="8" r="1" fill={C.primary}/></svg>
     case 'music': return <svg viewBox="0 0 24 24" width="20" height="20" {...s}><path d="M9 17V5l10-2v12"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="15" r="2"/></svg>
     case 'park': return <svg viewBox="0 0 24 24" width="20" height="20" {...s}><path d="M12 14c-3 0-5-2-5-5s2-5 5-5 5 2 5 5-2 5-5 5z"/><path d="M12 14v6M9 20h6"/></svg>
+    case 'museum': return <svg viewBox="0 0 24 24" width="20" height="20" {...s}><path d="M3 21h18M3 10h18M12 3L3 10h18L12 3z"/><path d="M6 10v11M10 10v11M14 10v11M18 10v11"/></svg>
+    case 'sports': return <svg viewBox="0 0 24 24" width="20" height="20" {...s}><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 018 8M12 4a8 8 0 00-8 8"/><path d="M4 12h16"/></svg>
+    case 'food': return <svg viewBox="0 0 24 24" width="20" height="20" {...s}><path d="M18 8h1a4 4 0 000-8h-1v8zM2 8h16v13H2zM6 1v7M10 1v7M14 1v7"/></svg>
     default: return null
   }
 }
@@ -63,10 +66,10 @@ function PlaceIcon({ kind }) {
 
 const CATEGORIES = [
   { label: 'Library', icon: 'book', key: 'library' },
-  { label: 'Gymnastics', icon: 'gym', key: 'gymnastics' },
+  { label: 'Museum', icon: 'museum', key: 'museum' },
   { label: 'Art', icon: 'art', key: 'art' },
-  { label: 'Music', icon: 'music', key: 'music' },
   { label: 'Parks', icon: 'park', key: 'park' },
+  { label: 'Sports', icon: 'sports', key: 'sports' },
 ]
 
 // Sample favorites from design spec
@@ -76,7 +79,7 @@ const SAMPLE_FAVORITES = [
   { id: 's3', name: 'The Little Gym', dist: '3.1 mi away', icon: 'building' },
 ]
 
-const ALL_CATS = ['all', 'library', 'gymnastics', 'art', 'music', 'park', 'other']
+const ALL_CATS = ['all', 'library', 'museum', 'gymnastics', 'art', 'music', 'park', 'sports', 'food', 'other']
 
 const EMPTY_FORM = { name: '', category: 'other', address: '', lat: null, lng: null, website_url: '', notes: '' }
 
