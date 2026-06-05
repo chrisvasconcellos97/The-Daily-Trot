@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import ViewHeader from '../components/ViewHeader'
 import Modal from '../components/Modal'
 import { usePlaces } from '../hooks/usePlaces'
@@ -6,31 +6,29 @@ import C from '../colors'
 
 const NOMINATIM = 'https://nominatim.openstreetmap.org/search'
 
-function useNominatim(query) {
+function useNominatim() {
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
-  const timer = useRef(null)
 
-  useEffect(() => {
-    if (query.length < 3) { setResults([]); return }
-    clearTimeout(timer.current)
-    timer.current = setTimeout(async () => {
-      setLoading(true)
-      try {
-        const url = `${NOMINATIM}?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`
-        const res = await fetch(url, { headers: { 'Accept-Language': 'en', 'User-Agent': 'DailyTrotApp/1.0' } })
-        const data = await res.json()
-        setResults(data)
-      } catch {
-        setResults([])
-      } finally {
-        setLoading(false)
-      }
-    }, 500)
-    return () => clearTimeout(timer.current)
-  }, [query])
+  const search = useCallback(async (query) => {
+    if (!query || query.trim().length < 2) return
+    setLoading(true)
+    setResults([])
+    try {
+      const url = `${NOMINATIM}?q=${encodeURIComponent(query.trim())}&format=json&limit=6&addressdetails=1&namedetails=1`
+      const res = await fetch(url, { headers: { 'Accept-Language': 'en', 'User-Agent': 'DailyTrotApp/1.0' } })
+      const data = await res.json()
+      setResults(data)
+    } catch {
+      setResults([])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
-  return { results, loading }
+  const clear = useCallback(() => setResults([]), [])
+
+  return { results, loading, search, clear }
 }
 
 function CatIcon({ kind }) {
@@ -89,9 +87,8 @@ export default function PlacesView({ familyId, toast }) {
   const [showAddModal, setShowAddModal] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
-  const [nameQuery, setNameQuery] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const { results, loading: searchLoading } = useNominatim(nameQuery)
+  const { results, loading: searchLoading, search: runSearch, clear: clearResults } = useNominatim()
 
   const filtered = places
     .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()))
@@ -100,17 +97,16 @@ export default function PlacesView({ familyId, toast }) {
   const favorites = filtered.filter(p => p.is_favorite)
   const rest = filtered.filter(p => !p.is_favorite)
 
-  const handleNameChange = (val) => {
-    setForm(f => ({ ...f, name: val, lat: null, lng: null }))
-    setNameQuery(val)
+  const handleSearch = () => {
+    if (!form.name.trim()) return
     setShowSuggestions(true)
+    runSearch(form.name)
   }
 
   const pickSuggestion = (r) => {
-    const addr = r.display_name
-    const shortName = r.namedetails?.name || r.name || form.name
-    setForm(f => ({ ...f, name: shortName || f.name, address: addr, lat: parseFloat(r.lat), lng: parseFloat(r.lon) }))
-    setNameQuery('')
+    const shortName = r.namedetails?.name || r.name || r.display_name.split(',')[0]
+    setForm(f => ({ ...f, name: shortName || f.name, address: r.display_name, lat: parseFloat(r.lat), lng: parseFloat(r.lon) }))
+    clearResults()
     setShowSuggestions(false)
   }
 
@@ -122,7 +118,7 @@ export default function PlacesView({ familyId, toast }) {
       toast('Place added!')
       setShowAddModal(false)
       setForm(EMPTY_FORM)
-      setNameQuery('')
+      clearResults()
     } catch {
       toast('Could not add place', 'error')
     } finally {
@@ -257,29 +253,45 @@ export default function PlacesView({ familyId, toast }) {
         </svg>
       </button>
 
-      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); setNameQuery(''); setShowSuggestions(false) }} title="Add Place">
+      <Modal isOpen={showAddModal} onClose={() => { setShowAddModal(false); clearResults(); setShowSuggestions(false) }} title="Add Place">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Name with autocomplete */}
+          {/* Name + search button */}
           <div style={{ position: 'relative' }}>
             <label className="field-label" htmlFor="place-name">Name *</label>
-            <input
-              id="place-name"
-              className="input-field"
-              placeholder="Search for a place..."
-              value={form.name}
-              onChange={e => handleNameChange(e.target.value)}
-              onFocus={() => nameQuery.length >= 3 && setShowSuggestions(true)}
-              autoComplete="off"
-            />
-            {showSuggestions && (results.length > 0 || searchLoading) && (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                id="place-name"
+                className="input-field"
+                style={{ flex: 1, marginBottom: 0 }}
+                placeholder="e.g. Winter Park Library"
+                value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value, lat: null, lng: null }))}
+                onKeyDown={e => { if (e.key === 'Enter') handleSearch() }}
+                autoComplete="off"
+              />
+              <button
+                onClick={handleSearch}
+                disabled={searchLoading}
+                style={{
+                  flexShrink: 0, width: 44, height: 44, borderRadius: 10,
+                  background: C.primary, border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  opacity: searchLoading ? 0.6 : 1,
+                }}
+                aria-label="Search"
+              >
+                {searchLoading
+                  ? <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#F6F0DE" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="8" strokeDasharray="30" strokeDashoffset="10"/></svg>
+                  : <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#F6F0DE" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg>
+                }
+              </button>
+            </div>
+            {showSuggestions && results.length > 0 && (
               <div style={{
                 position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
                 background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10,
                 boxShadow: '0 4px 16px rgba(0,0,0,0.1)', marginTop: 4, overflow: 'hidden',
               }}>
-                {searchLoading && (
-                  <div style={{ padding: '10px 14px', fontFamily: C.serif, fontSize: 12, color: C.inkMuted, fontStyle: 'italic' }}>Searching…</div>
-                )}
                 {results.map((r, i) => {
                   const name = r.namedetails?.name || r.name || r.display_name.split(',')[0]
                   const addr = r.display_name
